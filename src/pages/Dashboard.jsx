@@ -1,6 +1,6 @@
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -9,18 +9,10 @@ const Dashboard = () => {
   const [assetSelezionato, setAssetSelezionato] = useState(null);
   const [alertMessaggio, setAlertMessaggio] = useState("");
 
-  useEffect(() => {
-    fetchDati();
-  }, []);
-
-  useEffect(() => {
-    if (assetSelezionato) {
-      fetchAlert(assetSelezionato);
-    }
-  }, [assetSelezionato]);
-
-  const fetchDati = async () => {
+  const fetchDati = useCallback(async () => {
     try {
+      console.log("DEBUG - Fetching dati...");
+
       const [azioniRes, transazioniRes] = await Promise.all([
         fetch("http://localhost:8080/api/azioni"),
         fetch("http://localhost:8080/api/transazioni"),
@@ -36,24 +28,46 @@ const Dashboard = () => {
       setTransazioni(transazioniData);
 
       if (azioniData.length > 0) {
-        setAssetSelezionato(azioniData[0].id); // Seleziono il primo asset per default! [0]
+        setAssetSelezionato(azioniData[0].id);
       }
     } catch (error) {
       console.error("Errore nel recupero dei dati:", error);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchDati();
+    const interval = setInterval(() => {
+      fetchDati();
+    }, 12000);
+    return () => clearInterval(interval);
+  }, [fetchDati]);
+
+  useEffect(() => {
+    if (assetSelezionato) {
+      fetchAlert(assetSelezionato);
+    }
+  }, [assetSelezionato]);
 
   const fetchAlert = async (assetId) => {
     try {
+      console.log(`DEBUG - Richiesta alert per asset ID: ${assetId}`);
+
       const response = await fetch(`http://localhost:8080/api/previsione/alert/${assetId}`);
+
+      if (!response.ok) {
+        throw new Error(`Errore HTTP: ${response.status}`);
+      }
+
       const alertData = await response.text();
       console.log("DEBUG - Alert ricevuto:", alertData);
-      setAlertMessaggio(alertData.includes("🚨") ? alertData : "");
+
+      setAlertMessaggio(alertData.includes("🚨") ? alertData : "✅ Nessuna variazione significativa.");
     } catch (error) {
       console.error("Errore nel recupero dell'alert:", error);
-      setAlertMessaggio("");
+      setAlertMessaggio(`❌ Errore nel recupero dell'alert: ${error.message}`);
     }
   };
 
@@ -68,10 +82,19 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
+          {alertMessaggio && (
+            <Row>
+              <Col md={12} className="mb-3">
+                <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="text-center">
+                  {alertMessaggio}
+                </Alert>
+              </Col>
+            </Row>
+          )}
+
           <Row>
-            {/* Selettore per scegliere un asset */}
             <Col md={12} className="mb-3 text-center">
-              <Form.Select value={assetSelezionato} onChange={(e) => setAssetSelezionato(e.target.value)}>
+              <Form.Select value={assetSelezionato} onChange={(e) => setAssetSelezionato(Number(e.target.value))}>
                 {azioni.map((azione) => (
                   <option key={azione.id} value={azione.id}>
                     {azione.nome}
@@ -81,19 +104,7 @@ const Dashboard = () => {
             </Col>
           </Row>
 
-          {/* Sezione Alert */}
-          {alertMessaggio && (
-            <Row>
-              <Col md={12} className="mb-3">
-                <Alert variant="danger" className="text-center">
-                  {alertMessaggio}
-                </Alert>
-              </Col>
-            </Row>
-          )}
-
           <Row>
-            {/* Sezione con il Grafico */}
             <Col md={8} className="mb-4">
               <Card className="dashboard-card">
                 <Card.Body>
@@ -107,7 +118,6 @@ const Dashboard = () => {
               </Card>
             </Col>
 
-            {/* Sezione Informazioni */}
             <Col md={4} className="mb-4">
               <Card className="dashboard-card">
                 <Card.Body>
@@ -139,7 +149,6 @@ const Dashboard = () => {
             </Col>
           </Row>
 
-          {/* Sezione con la Lista delle Transazioni */}
           <Row>
             <Col md={12} className="mb-4">
               <Card className="dashboard-card">
