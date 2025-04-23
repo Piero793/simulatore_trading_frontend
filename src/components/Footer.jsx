@@ -3,7 +3,7 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 
 const Footer = () => {
   return (
-    <footer className="footer bg-dark text-white py-4 shadow">
+    <footer className="footer bg-dark text-white py-4 shadow border-top border-secondary">
       <Container>
         <Row className="align-items-center">
           {/* Copyright */}
@@ -13,29 +13,53 @@ const Footer = () => {
 
           {/* Link di navigazione */}
           <Col md={4} className="text-center">
-            <a href="/" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a href="/" className="text-secondary mx-2 fw-bold hover:text-light" style={{ textDecoration: "none" }}>
               Home
             </a>
-            <a href="/portfolio" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="/portfolio"
+              className="text-secondary mx-2 fw-bold hover:text-light"
+              style={{ textDecoration: "none" }}
+            >
               Portfolio
             </a>
-            <a href="/simulazione" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="/simulazione"
+              className="text-secondary mx-2 fw-bold hover:text-light"
+              style={{ textDecoration: "none" }}
+            >
               Simulazione
             </a>
           </Col>
 
           {/* Social Icons */}
           <Col md={4} className="text-center text-md-end">
-            <a href="https://facebook.com" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="https://facebook.com"
+              className="text-white mx-2"
+              style={{ textDecoration: "none", transition: "0.3s ease-in-out" }}
+            >
               <FaFacebook size={24} />
             </a>
-            <a href="https://twitter.com" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="https://twitter.com"
+              className="text-white mx-2"
+              style={{ textDecoration: "none", transition: "0.3s ease-in-out" }}
+            >
               <FaTwitter size={24} />
             </a>
-            <a href="https://instagram.com" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="https://instagram.com"
+              className="text-white mx-2"
+              style={{ textDecoration: "none", transition: "0.3s ease-in-out" }}
+            >
               <FaInstagram size={24} />
             </a>
-            <a href="https://linkedin.com" className="text-white mx-2" style={{ textDecoration: "none" }}>
+            <a
+              href="https://linkedin.com"
+              className="text-white mx-2"
+              style={{ textDecoration: "none", transition: "0.3s ease-in-out" }}
+            >
               <FaLinkedin size={24} />
             </a>
           </Col>
