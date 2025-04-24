@@ -60,7 +60,11 @@ const Portfolio = ({ nomeUtente, aggiornaPortfolio }) => {
                 <tr key={index} onClick={() => setAzioneSelezionata(azione)} style={{ cursor: "pointer" }}>
                   <td>{azione.nome || "N/D"}</td>
                   <td>{azione.quantita ?? "N/D"}</td>
-                  <td>{azione.valoreAttuale ? azione.valoreAttuale.toFixed(2) : "N/D"}</td>
+                  <td>
+                    {azione.valoreAttuale && azione.quantita
+                      ? (azione.valoreAttuale * azione.quantita).toFixed(2)
+                      : "N/D"}
+                  </td>{" "}
                   <td className={azione.variazione >= 0 ? "text-success" : "text-danger"}>
                     {azione.variazione ? azione.variazione.toFixed(2) : "N/D"}
                   </td>

@@ -13,10 +13,12 @@ const Dashboard = () => {
     try {
       console.log("DEBUG - Fetching dati...");
 
-      const [azioniRes, transazioniRes] = await Promise.all([
-        fetch("http://localhost:8080/api/azioni"),
-        fetch("http://localhost:8080/api/transazioni"),
-      ]);
+      const azioniRes = await fetch("http://localhost:8080/api/azioni");
+      if (!azioniRes.ok) throw new Error(`Errore API Azioni: ${azioniRes.status} - ${azioniRes.statusText}`);
+
+      const transazioniRes = await fetch("http://localhost:8080/api/transazioni");
+      if (!transazioniRes.ok)
+        throw new Error(`Errore API Transazioni: ${transazioniRes.status} - ${transazioniRes.statusText}`);
 
       const azioniData = await azioniRes.json();
       const transazioniData = await transazioniRes.json();
@@ -27,7 +29,8 @@ const Dashboard = () => {
       setAzioni(azioniData);
       setTransazioni(transazioniData);
 
-      if (azioniData.length > 0) {
+      // Se non ci sono transazioni iniziali, forziamo un assetSelezionato
+      if (azioniData.length > 0 && !assetSelezionato) {
         setAssetSelezionato(azioniData[0].id);
       }
     } catch (error) {
@@ -35,7 +38,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [assetSelezionato]);
 
   useEffect(() => {
     fetchDati();
@@ -159,7 +162,8 @@ const Dashboard = () => {
                       {transazioni.map((transazione) => (
                         <li key={transazione.id}>
                           <strong>{transazione.tipoTransazione}:</strong> {transazione.quantita}x{" "}
-                          <strong>{transazione.nomeAzione}</strong> a €{transazione.prezzoUnitario.toFixed(2)}
+                          <strong>{transazione.nomeAzione}</strong> per un totale di €
+                          {(transazione.quantita * transazione.prezzoUnitario).toFixed(2)}
                         </li>
                       ))}
                     </ul>
