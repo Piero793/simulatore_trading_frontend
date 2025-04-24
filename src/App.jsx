@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./components/Home";
 import CustomNavbar from "./components/CustomNavbar";
 import Dashboard from "./pages/Dashboard";
 import Portfolio from "./pages/portfolio";
@@ -9,28 +10,35 @@ import Footer from "./components/Footer";
 import { useState } from "react";
 
 const App = () => {
-  const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0); // Stato per aggiornare Portfolio
+  const [autenticato, setAutenticato] = useState(true); // Stato per gestire il login true finche non implemento autenticazione
+  const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0); // Stato per aggiornare il Portfolio
 
   return (
     <Router>
       <div className="app-container">
-        {/* Navbar */}
-        <CustomNavbar />
+        {/* Navbar dinamica */}
+        <CustomNavbar autenticato={autenticato} />
 
         {/* Contenuto delle pagine */}
         <div className="content-container">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route
-              path="/portfolio"
-              element={<Portfolio nomeUtente="filippo" aggiornaPortfolio={aggiornaPortfolio} />} // nome utente filippo è provvisorio
-            />
-            <Route path="/simulazione" element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} />} />
+            <Route path="/" element={<Home setAutenticato={setAutenticato} />} />{" "}
+            {/* 🔥 Ora la Home è la pagina principale */}
+            {autenticato && (
+              <>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                  path="/portfolio"
+                  element={<Portfolio nomeUtente="filippo" aggiornaPortfolio={aggiornaPortfolio} />}
+                />
+                <Route path="/simulazione" element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} />} />
+              </>
+            )}
           </Routes>
         </div>
 
-        {/* Footer */}
-        <Footer />
+        {/* Footer dinamico */}
+        <Footer autenticato={autenticato} />
       </div>
     </Router>
   );
