@@ -1,6 +1,7 @@
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
 import { useState, useEffect, useCallback } from "react";
+import { FaBell } from "react-icons/fa";
 
 const Dashboard = () => {
   const [loading, setLoading] = useState(true);
@@ -8,6 +9,7 @@ const Dashboard = () => {
   const [transazioni, setTransazioni] = useState([]);
   const [assetSelezionato, setAssetSelezionato] = useState(null);
   const [alertMessaggio, setAlertMessaggio] = useState("");
+  const [mostraAlert, setMostraAlert] = useState(false);
 
   const fetchDati = useCallback(async () => {
     try {
@@ -85,16 +87,6 @@ const Dashboard = () => {
         </div>
       ) : (
         <>
-          {alertMessaggio && (
-            <Row>
-              <Col md={12} className="mb-3">
-                <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="text-center">
-                  {alertMessaggio}
-                </Alert>
-              </Col>
-            </Row>
-          )}
-
           <Row>
             <Col md={12} className="mb-3 text-center">
               <Form.Select value={assetSelezionato} onChange={(e) => setAssetSelezionato(Number(e.target.value))}>
@@ -120,11 +112,17 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
-
             <Col md={4} className="mb-4">
               <Card className="dashboard-card">
                 <Card.Body>
-                  <Card.Title>📌 Statistiche</Card.Title>
+                  <Card.Title>
+                    📌 Statistiche{" "}
+                    <FaBell
+                      style={{ cursor: "pointer", marginLeft: "10px", color: "#ff9800" }}
+                      onClick={() => setMostraAlert(!mostraAlert)}
+                    />
+                  </Card.Title>
+
                   {azioni.length > 0 ? (
                     <>
                       <p>
@@ -143,6 +141,13 @@ const Dashboard = () => {
                           {azioni.find((az) => az.id === assetSelezionato)?.variazione.toFixed(2) || "N/A"}%
                         </span>
                       </p>
+
+                      {/* 🔥 Mostriamo l'alert SOLO quando l'utente clicca sulla campanella */}
+                      {mostraAlert && (
+                        <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="mt-3">
+                          {alertMessaggio}
+                        </Alert>
+                      )}
                     </>
                   ) : (
                     <p>Nessuna statistica disponibile.</p>
@@ -150,6 +155,7 @@ const Dashboard = () => {
                 </Card.Body>
               </Card>
             </Col>
+            ;
           </Row>
 
           <Row>

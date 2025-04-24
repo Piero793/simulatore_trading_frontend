@@ -36,19 +36,17 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
   }, [data, transazioni, assetId]);
 
   const datiFiltrati = useMemo(() => {
-    return datiValidi.length > 0
-      ? datiValidi.slice(
-          intervallo === "1G"
-            ? -1
-            : intervallo === "1S"
-            ? -7
-            : intervallo === "1M"
-            ? -30
-            : intervallo === "1A"
-            ? -365
-            : -datiValidi.length
-        )
-      : [];
+    if (datiValidi.length === 0) return [];
+
+    const mappingIntervalli = {
+      "1G": 1,
+      "1S": 7,
+      "1M": 30,
+      "1A": 365,
+    };
+
+    const numDati = mappingIntervalli[intervallo] || datiValidi.length;
+    return datiValidi.slice(-Math.min(numDati, datiValidi.length)); // 🔥 Gestisce intervalli con pochi dati
   }, [intervallo, datiValidi]);
 
   const transazioniDataset = useMemo(() => {
