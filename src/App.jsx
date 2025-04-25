@@ -10,7 +10,7 @@ import Footer from "./components/Footer";
 import { useState } from "react";
 
 const App = () => {
-  const [autenticato, setAutenticato] = useState(true); // Stato per gestire il login true finche non implemento autenticazione
+  const [autenticato, setAutenticato] = useState(false); // ✅ Imposta a false all'inizio
   const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0); // Stato per aggiornare il Portfolio
 
   return (
