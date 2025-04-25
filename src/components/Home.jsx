@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom"; // Importa useNavigate
 
-const Home = ({ setAutenticato }) => {
+const Home = ({ setAutenticato, setUtenteLoggato }) => {
   const [formData, setFormData] = useState({ username: "", password: "", email: "" });
   const [errore, setErrore] = useState(null);
   const [mostraRegistrazione, setMostraRegistrazione] = useState(false); // 🔥 Gestisce la visibilità del form di registrazione
@@ -30,7 +30,8 @@ const Home = ({ setAutenticato }) => {
         const data = await response.json();
         console.log("Login riuscito. Dati utente:", data);
         setAutenticato(true);
-        navigate("/dashboard"); // 👈 Forza la navigazione dopo il successo
+        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); // ✅ Assicurati che il backend restituisca 'nome'
+        navigate("/dashboard");
         setErrore(null);
       } else {
         const errorData = await response.text();
@@ -65,7 +66,8 @@ const Home = ({ setAutenticato }) => {
         const data = await response.json();
         console.log("Registrazione riuscita. Dati utente:", data);
         setAutenticato(true);
-        navigate("/dashboard"); // 👈 Forza la navigazione dopo il successo
+        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); // ✅ Assicurati che il backend restituisca 'nome'
+        navigate("/dashboard");
         setErrore(null);
       } else {
         const errorData = await response.json();
@@ -181,6 +183,7 @@ const Home = ({ setAutenticato }) => {
 
 Home.propTypes = {
   setAutenticato: PropTypes.func.isRequired,
+  setUtenteLoggato: PropTypes.func.isRequired, // ✅ Ricevi anche il setter per l'utente
 };
 
 export default Home;

@@ -1,9 +1,10 @@
 import { Container, Form, Button, Alert, Row, Col, Modal } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
-const Simulazione = ({ setAggiornaPortfolio }) => {
-  console.log("DEBUG - Prop ricevuta in Simulazione:", setAggiornaPortfolio);
+const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
+  console.log("DEBUG - Prop utenteLoggato ricevuta in Simulazione:", utenteLoggato);
 
   const [azioni, setAzioni] = useState([]); // Stato per la lista di azioni disponibili
   const [azioneSelezionata, setAzioneSelezionata] = useState(null); // Stato per l'azione scelta
@@ -15,6 +16,7 @@ const Simulazione = ({ setAggiornaPortfolio }) => {
   const [showModal, setShowModal] = useState(false); // Stato per mostrare/nascondere il modale di conferma
   const [countdown, setCountdown] = useState(60); // Stato per il timer del modale
   const [tipoTransazione, setTipoTransazione] = useState(""); // Stato per il tipo di operazione
+  const navigate = useNavigate(); // Hook per la navigazione
 
   // Effetto per il recuperaro della lista di azioni dal backend
   useEffect(() => {
@@ -75,45 +77,41 @@ const Simulazione = ({ setAggiornaPortfolio }) => {
 
     const valoreTotale = quantita * azioneSelezionata.valoreAttuale;
 
-    // Controlla il saldo disponibile
-    if (tipoTransazione === "Acquisto" && valoreTotale > saldo) {
-      setMessaggio("🚫 Saldo insufficiente!");
-      return;
-    }
-
-    // Controlla la quantità disponibile per la vendita
-    if (tipoTransazione === "Vendita" && quantita > azioneSelezionata.quantita) {
-      setMessaggio(`🚫 Non puoi vendere più di ${azioneSelezionata.quantita} azioni!`);
-      return;
-    }
-
-    // Aggiorna il saldo utente
-    const nuovoSaldo = tipoTransazione === "Acquisto" ? saldo - valoreTotale : saldo + valoreTotale;
-    aggiornaSaldo(nuovoSaldo);
-
-    // Messaggio di conferma
-    setMessaggio(
-      `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${valoreTotale.toFixed(2)}`
-    );
-
-    // Creazione dell'oggetto transazione
     const transazione = {
       tipoTransazione,
       quantita,
       prezzoUnitario: azioneSelezionata.valoreAttuale,
       azioneId: azioneSelezionata.id,
-      nomeUtente: "filippo", // Sostituire con valore dinamico
+      nomeUtente: utenteLoggato?.nome, // ⚠️ Usa utenteLoggato?.nome
     };
 
-    // Invia la transazione al backend
-    await fetch("http://localhost:8080/api/transazioni", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(transazione),
-    });
+    try {
+      const response = await fetch("http://localhost:8080/api/transazioni", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(transazione),
+      });
 
-    aggiornaPortfolio();
-    setShowModal(false); // Chiude il modale dopo la conferma
+      if (response.ok) {
+        // const responseData = await response.json(); // Potresti voler fare qualcosa con la risposta
+        aggiornaSaldo(tipoTransazione === "Acquisto" ? saldo - valoreTotale : saldo + valoreTotale);
+        setMessaggio(
+          `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${valoreTotale.toFixed(2)}`
+        );
+        aggiornaPortfolio();
+        setShowModal(false); // Chiude il modale dopo la conferma
+        navigate("/portfolio"); // Reindirizza al Portfolio
+      } else {
+        // Gestisci gli errori dal backend
+        const errorData = await response.text(); // O response.json() se il backend invia JSON per gli errori
+        setMessaggio(`🚫 Errore nella transazione: ${errorData}`);
+        setShowModal(false); // Chiude il modale anche in caso di errore
+      }
+    } catch (error) {
+      console.error("Errore durante la comunicazione con il backend:", error);
+      setMessaggio("⚠️ Errore di comunicazione con il server.");
+      setShowModal(false);
+    }
   };
 
   return (
@@ -169,7 +167,7 @@ const Simulazione = ({ setAggiornaPortfolio }) => {
             </Modal.Header>
             <Modal.Body>
               Hai scelto di {tipoTransazione.toLowerCase()} {quantita} azioni di {azioneSelezionata?.nome}
-              al prezzo totale di €{(quantita * azioneSelezionata?.valoreAttuale).toFixed(2)}. Conferma entro{" "}
+              al prezzo totale di €{(quantita * azioneSelezionata?.valoreAttuale).toFixed(2)}. Conferma entro
               {countdown} secondi.
             </Modal.Body>
             <Modal.Footer>
@@ -186,8 +184,10 @@ const Simulazione = ({ setAggiornaPortfolio }) => {
     </Container>
   );
 };
+
 Simulazione.propTypes = {
   setAggiornaPortfolio: PropTypes.func.isRequired,
+  utenteLoggato: PropTypes.object, // ✅ Ricevi la prop utenteLoggato
 };
 
 export default Simulazione;

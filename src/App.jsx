@@ -10,34 +10,29 @@ import Footer from "./components/Footer";
 import { useState } from "react";
 
 const App = () => {
-  const [autenticato, setAutenticato] = useState(false); // ✅ Imposta a false all'inizio
-  const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0); // Stato per aggiornare il Portfolio
+  const [autenticato, setAutenticato] = useState(false);
+  const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0);
+  const [utenteLoggato, setUtenteLoggato] = useState(null); // Nuovo stato per l'utente
 
   return (
     <Router>
       <div className="app-container">
-        {/* Navbar dinamica */}
-        <CustomNavbar autenticato={autenticato} />
-
-        {/* Contenuto delle pagine */}
+        <CustomNavbar autenticato={autenticato} utente={utenteLoggato?.nome} /> {/* ✅ Modifica qui */}
         <div className="content-container">
           <Routes>
-            <Route path="/" element={<Home setAutenticato={setAutenticato} />} />{" "}
-            {/* 🔥 Ora la Home è la pagina principale */}
+            <Route path="/" element={<Home setAutenticato={setAutenticato} setUtenteLoggato={setUtenteLoggato} />} />
             {autenticato && (
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/portfolio" element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} />} />
                 <Route
-                  path="/portfolio"
-                  element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} />} // 👈 Rimosso nomeUtente
+                  path="/simulazione"
+                  element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} utenteLoggato={utenteLoggato} />}
                 />
-                <Route path="/simulazione" element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} />} />
               </>
             )}
           </Routes>
         </div>
-
-        {/* Footer dinamico */}
         <Footer autenticato={autenticato} />
       </div>
     </Router>
