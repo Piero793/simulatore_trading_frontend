@@ -29,7 +29,7 @@ const App = () => {
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route
                   path="/portfolio"
-                  element={<Portfolio nomeUtente="filippo" aggiornaPortfolio={aggiornaPortfolio} />}
+                  element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} />} // 👈 Rimosso nomeUtente
                 />
                 <Route path="/simulazione" element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} />} />
               </>

@@ -1,23 +1,21 @@
 import { useState, useEffect } from "react";
 import { Table, Container, Spinner, Alert } from "react-bootstrap";
-import PropTypes from "prop-types";
+import PropTypes from "prop-types"; // 👈 Importa PropTypes (anche se lo rimuoveremo per nomeUtente)
 import DettaglioAzione from "../components/DettaglioAzione";
 
-const Portfolio = ({ nomeUtente, aggiornaPortfolio }) => {
+const Portfolio = ({ aggiornaPortfolio }) => {
+  // 👈 Rimuovi nomeUtente dalle props
   const [portfolio, setPortfolio] = useState(null);
   const [azioneSelezionata, setAzioneSelezionata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  //  Recupera il portfolio ogni volta che `aggiornaPortfolio` cambia
+  // Recupera il portfolio ogni volta che `aggiornaPortfolio` cambia
   useEffect(() => {
-    if (!nomeUtente) {
-      setError("⚠️ Nome utente non fornito.");
-      setLoading(false);
-      return;
-    }
+    setLoading(true); // Imposta il caricamento all'inizio di ogni fetch
+    setError(null); // Resetta l'errore
 
-    fetch(`http://localhost:8080/api/portfolio/${nomeUtente}`)
+    fetch(`http://localhost:8080/api/portfolio`) // 👈 URL modificato: niente più /{nomeUtente}
       .then((response) => {
         if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
         return response.json();
@@ -32,7 +30,7 @@ const Portfolio = ({ nomeUtente, aggiornaPortfolio }) => {
         setError("❌ Errore nel recupero del portfolio.");
         setLoading(false);
       });
-  }, [nomeUtente, aggiornaPortfolio]);
+  }, [aggiornaPortfolio]); // 👈 Rimuovi nomeUtente dalle dipendenze
 
   return (
     <Container className="portfolio-container">
@@ -97,7 +95,6 @@ const Portfolio = ({ nomeUtente, aggiornaPortfolio }) => {
 
 // Validazione per eliminare l'errore ESLint
 Portfolio.propTypes = {
-  nomeUtente: PropTypes.string.isRequired,
   aggiornaPortfolio: PropTypes.number.isRequired,
 };
 
