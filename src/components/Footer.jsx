@@ -1,6 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap";
 import PropTypes from "prop-types";
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 const Footer = ({ autenticato }) => {
   return (
@@ -13,27 +14,27 @@ const Footer = ({ autenticato }) => {
 
           {autenticato && (
             <Col md={4} className="text-center">
-              <a
-                href="/dashboard"
+              <Link
+                to="/dashboard"
                 className="text-secondary mx-2 fw-bold hover:text-light"
                 style={{ textDecoration: "none" }}
               >
                 Dashboard
-              </a>
-              <a
-                href="/portfolio"
+              </Link>
+              <Link
+                to="/portfolio"
                 className="text-secondary mx-2 fw-bold hover:text-light"
                 style={{ textDecoration: "none" }}
               >
                 Portfolio
-              </a>
-              <a
-                href="/simulazione"
+              </Link>
+              <Link
+                to="/simulazione"
                 className="text-secondary mx-2 fw-bold hover:text-light"
                 style={{ textDecoration: "none" }}
               >
                 Simulazione
-              </a>
+              </Link>
             </Col>
           )}
 

@@ -28,7 +28,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
   const handleLogin = async () => {
     console.log("Inizio tentativo di login con:", { email: formData.email, password: formData.password });
     try {
-      const response = await fetch("http://localhost:8080/api/auth/login", {
+      const response = await fetch("http://localhost:8080/api/utenti/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
   const handleRegistration = async () => {
     console.log("Inizio tentativo di registrazione con:", formData);
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
+      const response = await fetch("http://localhost:8080/api/utenti/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,5 +1,5 @@
 import { Container, Form, Button, Alert, Row, Col, Modal } from "react-bootstrap";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 
@@ -9,22 +9,40 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   const [azioni, setAzioni] = useState([]); // Stato per la lista di azioni disponibili
   const [azioneSelezionata, setAzioneSelezionata] = useState(null); // Stato per l'azione scelta
   const [quantita, setQuantita] = useState(1); // Stato per la quantità da acquistare/vendere
-  const [saldo, setSaldo] = useState(() => {
-    return localStorage.getItem("saldo") ? parseFloat(localStorage.getItem("saldo")) : 10000;
-  }); // Stato per il saldo utente, salvato in localStorage
+  const [saldo, setSaldo] = useState(null); // Stato per il saldo utente, inizialmente null
   const [messaggio, setMessaggio] = useState(""); // Stato per i messaggi di feedback
   const [showModal, setShowModal] = useState(false); // Stato per mostrare/nascondere il modale di conferma
   const [countdown, setCountdown] = useState(60); // Stato per il timer del modale
   const [tipoTransazione, setTipoTransazione] = useState(""); // Stato per il tipo di operazione
   const navigate = useNavigate(); // Hook per la navigazione
 
-  // Effetto per il recuperaro della lista di azioni dal backend
+  // Funzione per recuperare il saldo dell'utente dal backend
+  const fetchSaldo = useCallback(async () => {
+    if (utenteLoggato?.nome) {
+      try {
+        const response = await fetch(`http://localhost:8080/api/utenti/saldo/${utenteLoggato.nome}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSaldo(data.saldo);
+        } else {
+          console.error("Errore nel recupero del saldo:", response.status);
+          setMessaggio("⚠️ Errore nel recupero del saldo.");
+        }
+      } catch (error) {
+        console.error("Errore durante la comunicazione per il saldo:", error);
+        setMessaggio("⚠️ Errore di comunicazione con il server per il saldo.");
+      }
+    }
+  }, [utenteLoggato?.nome]);
+
+  // Effetto per il recuperaro della lista di azioni dal backend e del saldo
   useEffect(() => {
-    fetch("http://localhost:8080/api/azioni")
-      .then((response) => response.json())
-      .then((data) => setAzioni(data))
-      .catch((error) => console.error("Errore nel recupero delle azioni:", error));
-  }, []);
+    Promise.all([fetch("http://localhost:8080/api/azioni").then((response) => response.json()), fetchSaldo()])
+      .then(([azioniData]) => {
+        setAzioni(azioniData);
+      })
+      .catch((error) => console.error("Errore nel recupero dei dati:", error));
+  }, [fetchSaldo]);
 
   // Effetto per gestire il countdown e chiusura automatica del modale
   useEffect(() => {
@@ -42,12 +60,6 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
     }
     return () => clearInterval(timer); // Pulizia del timer quando il modale si chiude
   }, [showModal]);
-
-  // Funzione per aggiornare il saldo utente
-  const aggiornaSaldo = (nuovoSaldo) => {
-    setSaldo(parseFloat(nuovoSaldo.toFixed(2))); // Aggiorna il saldo nello stato
-    localStorage.setItem("saldo", nuovoSaldo.toFixed(2)); // Mantiene il valore nel localStorage
-  };
 
   // Funzione per aggiornare il portfolio dell'utente
   const aggiornaPortfolio = () => {
@@ -93,13 +105,12 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       });
 
       if (response.ok) {
-        // const responseData = await response.json(); // Potrei voler fare qualcosa con la risposta
-        aggiornaSaldo(tipoTransazione === "Acquisto" ? saldo - valoreTotale : saldo + valoreTotale);
         setMessaggio(
           `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${valoreTotale.toFixed(2)}`
         );
         aggiornaPortfolio();
         setShowModal(false); // Chiude il modale dopo la conferma
+        fetchSaldo(); // Aggiorna il saldo dopo la transazione
         navigate("/portfolio"); // Reindirizza al Portfolio
       } else {
         // Gestisci gli errori dal backend
@@ -157,9 +168,16 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
               {messaggio}
             </Alert>
           )}
-          <Alert variant="secondary" className="mt-2">
-            💰 Saldo Virtuale: €{saldo.toFixed(2)}
-          </Alert>
+          {saldo !== null && (
+            <Alert variant="secondary" className="mt-2">
+              💰 Saldo Disponibile: €{saldo.toFixed(2)}
+            </Alert>
+          )}
+          {saldo === null && (
+            <Alert variant="warning" className="mt-2">
+              ⏳ Caricamento saldo...
+            </Alert>
+          )}
 
           <Modal show={showModal} onHide={() => setShowModal(false)}>
             <Modal.Header closeButton>
@@ -187,7 +205,9 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
 Simulazione.propTypes = {
   setAggiornaPortfolio: PropTypes.func.isRequired,
-  utenteLoggato: PropTypes.object,
+  utenteLoggato: PropTypes.shape({
+    nome: PropTypes.string,
+  }),
 };
 
 export default Simulazione;
