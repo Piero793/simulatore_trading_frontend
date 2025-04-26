@@ -18,7 +18,7 @@ import { FaDownload } from "react-icons/fa";
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, zoomPlugin);
 
 const GraficoAzioni = ({ data, transazioni, assetId }) => {
-  const chartRef = useRef(null); // 🔥 Referenza per gestione zoom/export
+  const chartRef = useRef(null); // Gestione zoom/export
   const [intervallo, setIntervallo] = useState("1M");
   const [datiValidi, setDatiValidi] = useState([]);
   const [transazioniValidi, setTransazioniValidi] = useState([]);
@@ -47,7 +47,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
     };
 
     const numDati = mappingIntervalli[intervallo] || datiValidi.length;
-    return datiValidi.slice(-Math.min(numDati, datiValidi.length)); // 🔥 Gestisce intervalli con pochi dati
+    return datiValidi.slice(-Math.min(numDati, datiValidi.length)); // Gestisce intervalli
   }, [intervallo, datiValidi]);
 
   const transazioniDataset = useMemo(() => {
@@ -64,7 +64,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
     return previsione
       ? [
           {
-            label: "🔮 Previsione Prezzo (€)",
+            label: " Previsione Prezzo (€)",
             data: [datiFiltrati[datiFiltrati.length - 1]?.valoreAttuale, previsione],
             borderColor: "#ff9800",
             borderDash: [5, 5],
@@ -112,7 +112,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
         ...previsioneDataset,
         ...trendlineDataset,
         {
-          label: "🔹 Transazioni (Acquisto/Vendita)",
+          label: " Transazioni (Acquisto/Vendita)",
           data: transazioniDataset,
           pointStyle: "circle",
           showLine: false,

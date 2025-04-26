@@ -1,13 +1,13 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom"; // Importa useNavigate
+import { useNavigate } from "react-router-dom";
 
 const Home = ({ setAutenticato, setUtenteLoggato }) => {
   const [formData, setFormData] = useState({ username: "", password: "", email: "" });
   const [errore, setErrore] = useState(null);
-  const [mostraRegistrazione, setMostraRegistrazione] = useState(false); // 🔥 Gestisce la visibilità del form di registrazione
-  const navigate = useNavigate(); // Ottieni la funzione navigate
+  const [mostraRegistrazione, setMostraRegistrazione] = useState(false); // Gestisce la visibilità del form di registrazione
+  const navigate = useNavigate(); // Chiamo la funzione navigate
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +30,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
         const data = await response.json();
         console.log("Login riuscito. Dati utente:", data);
         setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); // ✅ Assicurati che il backend restituisca 'nome'
+        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); //  il backend deve restituire 'nome'
         navigate("/dashboard");
         setErrore(null);
       } else {
@@ -53,8 +53,8 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome: formData.username, // ⚠️ Assumendo che 'username' sia il nome
-          cognome: "defaultCognome", // ⚠️ Dovresti aggiungere un campo cognome nel form se necessario
+          nome: formData.username, //  Assumendo che 'username' sia il nome
+          cognome: "defaultCognome", //  Dovrei aggiungere un campo cognome nel form se necessario
           email: formData.email,
           password: formData.password,
         }),
@@ -66,7 +66,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
         const data = await response.json();
         console.log("Registrazione riuscita. Dati utente:", data);
         setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); // ✅ Assicurati che il backend restituisca 'nome'
+        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ });
         navigate("/dashboard");
         setErrore(null);
       } else {
@@ -81,7 +81,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
   };
 
   const handleSubmitRegistration = (e) => {
-    e.preventDefault(); // Evita il refresh della pagina
+    e.preventDefault();
     handleRegistration();
   };
 
@@ -89,7 +89,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
     <Container className="text-center my-5">
       <Row className="justify-content-center">
         <Col md={6}>
-          <h1 className="fw-bold mb-4"> Benvenuto nel Simulatore di Trading!</h1>
+          <h1 className="fw-bold mb-4"> Benvenuto nel Simulatore di Trading</h1>
           <p className="text-secondary">Accedi alla tua Dashboard per monitorare il mercato e simulare investimenti.</p>
 
           {errore && <Alert variant="danger">{errore}</Alert>}
@@ -100,7 +100,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                 <Form.Group className="mb-3">
                   <Form.Control
                     type="text"
-                    placeholder="Email" // ⚠️ Backend si aspetta 'email' per il login
+                    placeholder="Email" // Backend si aspetta 'email' per il login
                     name="username" // Manteniamo 'username' ma inviamo come 'email'
                     value={formData.username}
                     onChange={handleChange}
@@ -133,7 +133,6 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
             <>
               <Form onSubmit={handleSubmitRegistration}>
                 {" "}
-                {/* ⚠️ Aggiunto onSubmit */}
                 <Form.Group className="mb-3">
                   <Form.Control
                     type="text"
@@ -163,7 +162,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                 </Form.Group>
                 <Button variant="success" className="w-100" type="submit">
                   {" "}
-                  {/* ⚠️ Cambiato onClick a onSubmit e aggiunto type="submit" */}✅ Completa Registrazione
+                  {/*  Cambiato onClick a onSubmit e aggiunto type="submit" */}✅ Completa Registrazione
                 </Button>
               </Form>
 
@@ -183,7 +182,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
 
 Home.propTypes = {
   setAutenticato: PropTypes.func.isRequired,
-  setUtenteLoggato: PropTypes.func.isRequired, // ✅ Ricevi anche il setter per l'utente
+  setUtenteLoggato: PropTypes.func.isRequired, //  Ricevo anche il setter per l'utente
 };
 
 export default Home;

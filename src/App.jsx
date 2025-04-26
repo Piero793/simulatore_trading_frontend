@@ -12,12 +12,12 @@ import { useState } from "react";
 const App = () => {
   const [autenticato, setAutenticato] = useState(false);
   const [aggiornaPortfolio, setAggiornaPortfolio] = useState(0);
-  const [utenteLoggato, setUtenteLoggato] = useState(null); // Nuovo stato per l'utente
+  const [utenteLoggato, setUtenteLoggato] = useState(null);
 
   return (
     <Router>
       <div className="app-container">
-        <CustomNavbar autenticato={autenticato} utente={utenteLoggato?.nome} /> {/* ✅ Modifica qui */}
+        <CustomNavbar autenticato={autenticato} utente={utenteLoggato?.nome} />
         <div className="content-container">
           <Routes>
             <Route path="/" element={<Home setAutenticato={setAutenticato} setUtenteLoggato={setUtenteLoggato} />} />

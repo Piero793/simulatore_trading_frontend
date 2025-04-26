@@ -82,7 +82,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       quantita,
       prezzoUnitario: azioneSelezionata.valoreAttuale,
       azioneId: azioneSelezionata.id,
-      nomeUtente: utenteLoggato?.nome, // ⚠️ Usa utenteLoggato?.nome
+      nomeUtente: utenteLoggato?.nome, // Usa utenteLoggato?.nome
     };
 
     try {
@@ -93,7 +93,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       });
 
       if (response.ok) {
-        // const responseData = await response.json(); // Potresti voler fare qualcosa con la risposta
+        // const responseData = await response.json(); // Potrei voler fare qualcosa con la risposta
         aggiornaSaldo(tipoTransazione === "Acquisto" ? saldo - valoreTotale : saldo + valoreTotale);
         setMessaggio(
           `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${valoreTotale.toFixed(2)}`
@@ -187,7 +187,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
 Simulazione.propTypes = {
   setAggiornaPortfolio: PropTypes.func.isRequired,
-  utenteLoggato: PropTypes.object, // ✅ Ricevi la prop utenteLoggato
+  utenteLoggato: PropTypes.object,
 };
 
 export default Simulazione;

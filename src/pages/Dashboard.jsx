@@ -142,7 +142,7 @@ const Dashboard = () => {
                         </span>
                       </p>
 
-                      {/* 🔥 Mostriamo l'alert SOLO quando l'utente clicca sulla campanella */}
+                      {/*  Mostro l'alert SOLO quando l'utente clicca sulla campanella */}
                       {mostraAlert && (
                         <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="mt-3">
                           {alertMessaggio}
