@@ -127,7 +127,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
   return (
     <Container className="simulazione-container">
-      <h2 className="text-center my-4">💸 Simulazione Acquisto/Vendita</h2>
+      <h2 className="text-center my-4"> Simulazione Acquisto/Vendita</h2>
 
       <Row className="justify-content-center">
         <Col md={6}>

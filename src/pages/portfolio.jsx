@@ -87,7 +87,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
           )}
         </>
       ) : (
-        <Alert variant="warning">🔹 Il portfolio è vuoto, acquista la tua prima azione!</Alert>
+        <Alert variant="warning"> Il portfolio è vuoto, acquista la tua prima azione!</Alert>
       )}
     </Container>
   );
