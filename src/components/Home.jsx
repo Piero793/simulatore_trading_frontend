@@ -4,24 +4,24 @@ import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
 const Home = ({ setAutenticato, setUtenteLoggato }) => {
-  const [formData, setFormData] = useState({ username: "", password: "", email: "" });
+  const [formData, setFormData] = useState({ nome: "", cognome: "", email: "", password: "" });
   const [errore, setErrore] = useState(null);
-  const [mostraRegistrazione, setMostraRegistrazione] = useState(false); // Gestisce la visibilità del form di registrazione
-  const navigate = useNavigate(); // Chiamo la funzione navigate
+  const [mostraRegistrazione, setMostraRegistrazione] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleLogin = async () => {
-    console.log("Inizio tentativo di login con:", { email: formData.username, password: formData.password });
+    console.log("Inizio tentativo di login con:", { email: formData.email, password: formData.password });
     try {
       const response = await fetch("http://localhost:8080/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: formData.username, password: formData.password }), // ⚠️ Backend si aspetta 'email'
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
 
       console.log("Risposta dal backend (login):", response);
@@ -30,7 +30,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
         const data = await response.json();
         console.log("Login riuscito. Dati utente:", data);
         setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ }); //  il backend deve restituire 'nome'
+        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ });
         navigate("/dashboard");
         setErrore(null);
       } else {
@@ -53,8 +53,8 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          nome: formData.username, //  Assumendo che 'username' sia il nome
-          cognome: "defaultCognome", //  Dovrei aggiungere un campo cognome nel form se necessario
+          nome: formData.nome,
+          cognome: formData.cognome,
           email: formData.email,
           password: formData.password,
         }),
@@ -66,7 +66,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
         const data = await response.json();
         console.log("Registrazione riuscita. Dati utente:", data);
         setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ });
+        setUtenteLoggato({ nome: data.nome, id: data.id });
         navigate("/dashboard");
         setErrore(null);
       } else {
@@ -85,6 +85,11 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
     handleRegistration();
   };
 
+  const handleSubmitLogin = (e) => {
+    e.preventDefault();
+    handleLogin();
+  };
+
   return (
     <Container className="text-center my-5">
       <Row className="justify-content-center">
@@ -96,14 +101,15 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
 
           {!mostraRegistrazione ? (
             <>
-              <Form>
+              <Form onSubmit={handleSubmitLogin}>
                 <Form.Group className="mb-3">
                   <Form.Control
-                    type="text"
-                    placeholder="Email" // Backend si aspetta 'email' per il login
-                    name="username" // Manteniamo 'username' ma inviamo come 'email'
-                    value={formData.username}
+                    type="email"
+                    placeholder="Email"
+                    name="email"
+                    value={formData.email}
                     onChange={handleChange}
+                    required
                   />
                 </Form.Group>
 
@@ -114,10 +120,11 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    required
                   />
                 </Form.Group>
 
-                <Button variant="primary" className="w-100" onClick={handleLogin}>
+                <Button variant="primary" className="w-100" type="submit">
                   🔑 Login
                 </Button>
               </Form>
@@ -132,14 +139,24 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
           ) : (
             <>
               <Form onSubmit={handleSubmitRegistration}>
-                {" "}
                 <Form.Group className="mb-3">
                   <Form.Control
                     type="text"
                     placeholder="Nome"
-                    name="username"
-                    value={formData.username}
+                    name="nome"
+                    value={formData.nome}
                     onChange={handleChange}
+                    required
+                  />
+                </Form.Group>
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    type="text"
+                    placeholder="Cognome"
+                    name="cognome"
+                    value={formData.cognome}
+                    onChange={handleChange}
+                    required
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
@@ -149,6 +166,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
+                    required
                   />
                 </Form.Group>
                 <Form.Group className="mb-3">
@@ -158,11 +176,11 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
+                    required
                   />
                 </Form.Group>
                 <Button variant="success" className="w-100" type="submit">
-                  {" "}
-                  {/*  Cambiato onClick a onSubmit e aggiunto type="submit" */}✅ Completa Registrazione
+                  ✅ Completa Registrazione
                 </Button>
               </Form>
 
@@ -182,7 +200,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
 
 Home.propTypes = {
   setAutenticato: PropTypes.func.isRequired,
-  setUtenteLoggato: PropTypes.func.isRequired, //  Ricevo anche il setter per l'utente
+  setUtenteLoggato: PropTypes.func.isRequired,
 };
 
 export default Home;
