@@ -7,10 +7,22 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
   const [formData, setFormData] = useState({ nome: "", cognome: "", email: "", password: "" });
   const [errore, setErrore] = useState(null);
   const [mostraRegistrazione, setMostraRegistrazione] = useState(false);
+  const [mostraAlert, setMostraAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const gestisciLoginSuccesso = (data) => {
+    console.log("Login riuscito. Dati utente:", data);
+    setAutenticato(true);
+    setUtenteLoggato({ nome: data.nome, id: data.id });
+    setErrore(null);
+    setAlertMessage(`Benvenuto, ${data.nome}!`);
+    setMostraAlert(true);
+    setTimeout(() => navigate("/dashboard"), 1500); // Naviga dopo 1.5 secondi
   };
 
   const handleLogin = async () => {
@@ -28,11 +40,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Login riuscito. Dati utente:", data);
-        setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id /* ... altre info utente se presenti ... */ });
-        navigate("/dashboard");
-        setErrore(null);
+        gestisciLoginSuccesso(data);
       } else {
         const errorData = await response.text();
         console.error("Errore durante il login:", response.status, errorData);
@@ -42,6 +50,16 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
       console.error("Errore durante la chiamata al login:", error);
       setErrore("❌ Impossibile connettersi al server.");
     }
+  };
+
+  const gestisciRegistrazioneSuccesso = (data) => {
+    console.log("Registrazione riuscita. Dati utente:", data);
+    setAutenticato(true);
+    setUtenteLoggato({ nome: data.nome, id: data.id });
+    setErrore(null);
+    setAlertMessage(`Registrazione completata con successo, ${data.nome}!`);
+    setMostraAlert(true);
+    setTimeout(() => navigate("/dashboard"), 1500); // Naviga dopo 1.5 secondi
   };
 
   const handleRegistration = async () => {
@@ -64,11 +82,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
 
       if (response.status === 201) {
         const data = await response.json();
-        console.log("Registrazione riuscita. Dati utente:", data);
-        setAutenticato(true);
-        setUtenteLoggato({ nome: data.nome, id: data.id });
-        navigate("/dashboard");
-        setErrore(null);
+        gestisciRegistrazioneSuccesso(data);
       } else {
         const errorData = await response.json();
         console.error("Errore durante la registrazione:", response.status, errorData);
@@ -98,6 +112,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
           <p className="text-secondary">Accedi alla tua Dashboard per monitorare il mercato e simulare investimenti.</p>
 
           {errore && <Alert variant="danger">{errore}</Alert>}
+          {mostraAlert && <Alert variant="success">{alertMessage}</Alert>}
 
           {!mostraRegistrazione ? (
             <>
