@@ -17,13 +17,13 @@ const App = () => {
   return (
     <Router>
       <div className="app-container">
-        <CustomNavbar autenticato={autenticato} utente={utenteLoggato?.nome} />
+        <CustomNavbar autenticato={autenticato} setAutenticato={setAutenticato} utente={utenteLoggato?.nome} />
         <div className="content-container">
           <Routes>
             <Route path="/" element={<Home setAutenticato={setAutenticato} setUtenteLoggato={setUtenteLoggato} />} />
             {autenticato && (
               <>
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard" element={<Dashboard utenteLoggato={utenteLoggato} />} />
                 <Route
                   path="/portfolio"
                   element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} utenteLoggato={utenteLoggato} />}

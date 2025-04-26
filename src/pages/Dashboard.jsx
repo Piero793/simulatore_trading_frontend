@@ -2,8 +2,9 @@ import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap
 import GraficoAzioni from "../components/GraficoAzioni";
 import { useState, useEffect, useCallback } from "react";
 import { FaBell } from "react-icons/fa";
+import PropTypes from "prop-types";
 
-const Dashboard = () => {
+const Dashboard = ({ utenteLoggato }) => {
   const [loading, setLoading] = useState(true);
   const [azioni, setAzioni] = useState([]);
   const [transazioni, setTransazioni] = useState([]);
@@ -18,7 +19,8 @@ const Dashboard = () => {
       const azioniRes = await fetch("http://localhost:8080/api/azioni");
       if (!azioniRes.ok) throw new Error(`Errore API Azioni: ${azioniRes.status} - ${azioniRes.statusText}`);
 
-      const transazioniRes = await fetch("http://localhost:8080/api/transazioni");
+      // recupero solo le transazioni dell'utente loggato
+      const transazioniRes = await fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato?.nome}`);
       if (!transazioniRes.ok)
         throw new Error(`Errore API Transazioni: ${transazioniRes.status} - ${transazioniRes.statusText}`);
 
@@ -40,7 +42,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [assetSelezionato]);
+  }, [assetSelezionato, utenteLoggato?.nome]);
 
   useEffect(() => {
     fetchDati();
@@ -142,7 +144,6 @@ const Dashboard = () => {
                         </span>
                       </p>
 
-                      {/*  Mostro l'alert SOLO quando l'utente clicca sulla campanella */}
                       {mostraAlert && (
                         <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="mt-3">
                           {alertMessaggio}
@@ -162,7 +163,7 @@ const Dashboard = () => {
             <Col md={12} className="mb-4">
               <Card className="dashboard-card">
                 <Card.Body>
-                  <Card.Title>📜 Cronologia Transazioni</Card.Title>
+                  <Card.Title> Cronologia Transazioni</Card.Title>
                   {transazioni.length > 0 ? (
                     <ul>
                       {transazioni.map((transazione) => (
@@ -184,6 +185,14 @@ const Dashboard = () => {
       )}
     </Container>
   );
+};
+
+// Aggiungi la validazione delle props
+Dashboard.propTypes = {
+  utenteLoggato: PropTypes.shape({
+    nome: PropTypes.string,
+    id: PropTypes.number,
+  }),
 };
 
 export default Dashboard;
