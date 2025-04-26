@@ -24,7 +24,10 @@ const App = () => {
             {autenticato && (
               <>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/portfolio" element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} />} />
+                <Route
+                  path="/portfolio"
+                  element={<Portfolio aggiornaPortfolio={aggiornaPortfolio} utenteLoggato={utenteLoggato} />}
+                />{" "}
                 <Route
                   path="/simulazione"
                   element={<Simulazione setAggiornaPortfolio={setAggiornaPortfolio} utenteLoggato={utenteLoggato} />}

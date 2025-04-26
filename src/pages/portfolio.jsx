@@ -3,24 +3,25 @@ import { Table, Container, Spinner, Alert } from "react-bootstrap";
 import PropTypes from "prop-types";
 import DettaglioAzione from "../components/DettaglioAzione";
 
-const Portfolio = ({ aggiornaPortfolio }) => {
+const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
   const [portfolio, setPortfolio] = useState(null);
   const [azioneSelezionata, setAzioneSelezionata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Recupera il portfolio ogni volta che `aggiornaPortfolio` cambia
   useEffect(() => {
     setLoading(true);
-    setError(null); // Resetto l'errore
+    setError(null);
 
-    fetch(`http://localhost:8080/api/portfolio`)
+    console.log("DEBUG - Nome utente per la richiesta portfolio:", utenteLoggato?.nome); // Verifica il nome utente
+
+    fetch(`http://localhost:8080/api/portfolio?nomeUtente=${utenteLoggato?.nome}`)
       .then((response) => {
         if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
         return response.json();
       })
       .then((data) => {
-        console.log("DEBUG - Portfolio ricevuto:", data); // Debug per verificare i dati ricevuti
+        console.log("DEBUG - Portfolio ricevuto:", data);
         setPortfolio(data);
         setLoading(false);
       })
@@ -29,7 +30,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
         setError("❌ Errore nel recupero del portfolio.");
         setLoading(false);
       });
-  }, [aggiornaPortfolio]);
+  }, [aggiornaPortfolio, utenteLoggato?.nome]);
 
   return (
     <Container className="portfolio-container">
@@ -61,7 +62,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
                     {azione.valoreAttuale && azione.quantita
                       ? (azione.valoreAttuale * azione.quantita).toFixed(2)
                       : "N/D"}
-                  </td>{" "}
+                  </td>
                   <td className={azione.variazione >= 0 ? "text-success" : "text-danger"}>
                     {azione.variazione ? azione.variazione.toFixed(2) : "N/D"}
                   </td>
@@ -92,9 +93,12 @@ const Portfolio = ({ aggiornaPortfolio }) => {
   );
 };
 
-// Validazione per eliminare l'errore ESLint
 Portfolio.propTypes = {
   aggiornaPortfolio: PropTypes.number.isRequired,
+  utenteLoggato: PropTypes.shape({
+    nome: PropTypes.string.isRequired,
+    id: PropTypes.number,
+  }),
 };
 
 export default Portfolio;
