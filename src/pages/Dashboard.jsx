@@ -3,11 +3,11 @@ import GraficoAzioni from "../components/GraficoAzioni";
 import { useState, useEffect, useCallback } from "react";
 import { FaBell } from "react-icons/fa";
 import PropTypes from "prop-types";
+import FinancialNews from "./FinancialNews";
 
 const Dashboard = ({ utenteLoggato }) => {
   const [loading, setLoading] = useState(true);
   const [azioni, setAzioni] = useState([]);
-  const [transazioni, setTransazioni] = useState([]);
   const [assetSelezionato, setAssetSelezionato] = useState(null);
   const [alertMessaggio, setAlertMessaggio] = useState("");
   const [mostraAlert, setMostraAlert] = useState(false);
@@ -19,19 +19,11 @@ const Dashboard = ({ utenteLoggato }) => {
       const azioniRes = await fetch("http://localhost:8080/api/azioni");
       if (!azioniRes.ok) throw new Error(`Errore API Azioni: ${azioniRes.status} - ${azioniRes.statusText}`);
 
-      // recupero solo le transazioni dell'utente loggato
-      const transazioniRes = await fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato?.nome}`);
-      if (!transazioniRes.ok)
-        throw new Error(`Errore API Transazioni: ${transazioniRes.status} - ${transazioniRes.statusText}`);
-
       const azioniData = await azioniRes.json();
-      const transazioniData = await transazioniRes.json();
 
       console.log("DEBUG - Azioni ricevute:", azioniData);
-      console.log("DEBUG - Transazioni ricevute:", transazioniData);
 
       setAzioni(azioniData);
-      setTransazioni(transazioniData);
 
       // Se non ci sono transazioni iniziali, forziamo un assetSelezionato
       if (azioniData.length > 0 && !assetSelezionato) {
@@ -42,7 +34,7 @@ const Dashboard = ({ utenteLoggato }) => {
     } finally {
       setLoading(false);
     }
-  }, [assetSelezionato, utenteLoggato?.nome]);
+  }, [assetSelezionato]);
 
   useEffect(() => {
     fetchDati();
@@ -82,6 +74,8 @@ const Dashboard = ({ utenteLoggato }) => {
     <Container className="dashboard-container">
       <h2 className="text-center my-4">📊 Analisi del Mercato</h2>
 
+      {utenteLoggato?.nome && <p className="text-center mb-3">Benvenuto, {utenteLoggato.nome}!</p>}
+
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" role="status" />
@@ -107,7 +101,7 @@ const Dashboard = ({ utenteLoggato }) => {
                 <Card.Body>
                   <Card.Title>📈 Andamento del Prezzo delle Azioni</Card.Title>
                   {azioni.length > 0 ? (
-                    <GraficoAzioni data={azioni} transazioni={transazioni} assetId={assetSelezionato} />
+                    <GraficoAzioni data={azioni} transazioni={[]} assetId={assetSelezionato} />
                   ) : (
                     <p>Nessun dato disponibile.</p>
                   )}
@@ -156,27 +150,14 @@ const Dashboard = ({ utenteLoggato }) => {
                 </Card.Body>
               </Card>
             </Col>
-            ;
           </Row>
 
           <Row>
-            <Col md={12} className="mb-4">
+            <Col md={12}>
               <Card className="dashboard-card">
                 <Card.Body>
-                  <Card.Title> Cronologia Transazioni</Card.Title>
-                  {transazioni.length > 0 ? (
-                    <ul>
-                      {transazioni.map((transazione) => (
-                        <li key={transazione.id}>
-                          <strong>{transazione.tipoTransazione}:</strong> {transazione.quantita}x{" "}
-                          <strong>{transazione.nomeAzione}</strong> per un totale di €
-                          {(transazione.quantita * transazione.prezzoUnitario).toFixed(2)}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p>Nessuna transazione registrata.</p>
-                  )}
+                  <h2 className="text-center mb-4"> Ultimi Aggiornamenti</h2>
+                  <FinancialNews />
                 </Card.Body>
               </Card>
             </Col>

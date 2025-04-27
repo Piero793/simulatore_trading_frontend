@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Container, Spinner, Alert } from "react-bootstrap";
+import { Table, Container, Spinner, Alert, Card } from "react-bootstrap";
 import PropTypes from "prop-types";
 import DettaglioAzione from "../components/DettaglioAzione";
 
@@ -8,6 +8,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
   const [azioneSelezionata, setAzioneSelezionata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [transazioniPortfolio, setTransazioniPortfolio] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -30,11 +31,25 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         setError("❌ Errore nel recupero del portfolio.");
         setLoading(false);
       });
+
+    // Recupera anche le transazioni specifiche per il portfolio
+    fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato?.nome}`)
+      .then((response) => {
+        if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
+        return response.json();
+      })
+      .then((data) => {
+        console.log("DEBUG - Transazioni ricevute per il portfolio:", data);
+        setTransazioniPortfolio(data);
+      })
+      .catch((error) => {
+        console.error("Errore nel recupero delle transazioni per il portfolio:", error);
+      });
   }, [aggiornaPortfolio, utenteLoggato?.nome]);
 
   return (
     <Container className="portfolio-container">
-      <h2 className="text-center my-4">📌 Il tuo Portfolio</h2>
+      <h2 className="text-center my-4"> Il tuo Portfolio</h2>
       {loading ? (
         <div className="text-center my-5">
           <Spinner animation="border" role="status" />
@@ -84,6 +99,28 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
               handleClose={() => setAzioneSelezionata(null)}
               azione={azioneSelezionata}
             />
+          )}
+
+          {/* Inserimento della Cronologia Transazioni */}
+          <h2 className="text-center mt-5">Cronologia Transazioni</h2>
+          {transazioniPortfolio.length > 0 ? (
+            <Card className="mt-3">
+              <Card.Body>
+                <ul>
+                  {transazioniPortfolio.map((transazione) => (
+                    <li key={transazione.id}>
+                      <strong>{transazione.tipoTransazione}:</strong> {transazione.quantita}x{" "}
+                      <strong>{transazione.nomeAzione}</strong> per un totale di €
+                      {(transazione.quantita * transazione.prezzoUnitario).toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+              </Card.Body>
+            </Card>
+          ) : (
+            <Alert variant="info" className="mt-3 text-center">
+              Nessuna transazione registrata nel portfolio.
+            </Alert>
           )}
         </>
       ) : (
