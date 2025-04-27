@@ -72,7 +72,7 @@ const Dashboard = ({ utenteLoggato }) => {
 
   return (
     <Container className="dashboard-container">
-      <h2 className="text-center my-4">📊 Analisi del Mercato</h2>
+      <h2 className="text-center my-4"> Analisi del Mercato</h2>
 
       {utenteLoggato?.nome && <p className="text-center mb-3">Benvenuto, {utenteLoggato.nome}!</p>}
 
@@ -99,7 +99,7 @@ const Dashboard = ({ utenteLoggato }) => {
             <Col md={8} className="mb-4">
               <Card className="dashboard-card">
                 <Card.Body>
-                  <Card.Title>📈 Andamento del Prezzo delle Azioni</Card.Title>
+                  <Card.Title> Andamento del Prezzo delle Azioni</Card.Title>
                   {azioni.length > 0 ? (
                     <GraficoAzioni data={azioni} transazioni={[]} assetId={assetSelezionato} />
                   ) : (
@@ -112,7 +112,7 @@ const Dashboard = ({ utenteLoggato }) => {
               <Card className="dashboard-card">
                 <Card.Body>
                   <Card.Title>
-                    📌 Statistiche{" "}
+                    Statistiche{" "}
                     <FaBell
                       style={{ cursor: "pointer", marginLeft: "10px", color: "#ff9800" }}
                       onClick={() => setMostraAlert(!mostraAlert)}
@@ -152,11 +152,11 @@ const Dashboard = ({ utenteLoggato }) => {
             </Col>
           </Row>
 
-          <Row>
+          <Row className="mt-4">
             <Col md={12}>
               <Card className="dashboard-card">
                 <Card.Body>
-                  <h2 className="text-center mb-4"> Ultimi Aggiornamenti</h2>
+                  <h2 className="text-center mx-4"> Ultimi Aggiornamenti</h2>
                   <FinancialNews />
                 </Card.Body>
               </Card>

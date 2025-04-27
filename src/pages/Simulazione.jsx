@@ -133,7 +133,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
         <Col md={6}>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label>📈 Seleziona azione</Form.Label>
+              <Form.Label> Seleziona azione</Form.Label>
               <Form.Select onChange={(e) => setAzioneSelezionata(azioni.find((a) => a.id === Number(e.target.value)))}>
                 <option value="">Scegli azione...</option>
                 {azioni.map((azione) => (
@@ -144,7 +144,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>📦 Quantità</Form.Label>
+              <Form.Label> Quantità</Form.Label>
               <Form.Control
                 type="number"
                 value={quantita}
@@ -170,12 +170,12 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
           )}
           {saldo !== null && (
             <Alert variant="secondary" className="mt-2">
-              💰 Saldo Disponibile: €{saldo.toFixed(2)}
+              Saldo Disponibile: €{saldo.toFixed(2)}
             </Alert>
           )}
           {saldo === null && (
             <Alert variant="warning" className="mt-2">
-              ⏳ Caricamento saldo...
+              Caricamento saldo...
             </Alert>
           )}
 

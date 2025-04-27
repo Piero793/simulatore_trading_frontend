@@ -184,10 +184,10 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
 
       <div className=" mb-3">
         <button className="btn btn-outline-secondary me-3" onClick={resetZoom}>
-          🔄 Reset Zoom
+          Reset Zoom
         </button>
         <button className="btn btn-outline-success" onClick={exportChart}>
-          <FaDownload /> 📷 Esporta Grafico
+          <FaDownload /> Esporta Grafico
         </button>
       </div>
 

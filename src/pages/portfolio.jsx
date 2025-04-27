@@ -62,10 +62,10 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
           <Table striped bordered hover responsive className="text-center">
             <thead className="table-dark">
               <tr>
-                <th>📈 Nome Azione</th>
-                <th>📦 Quantità</th>
-                <th>💰 Valore Attuale (€)</th>
-                <th>📊 Variazione %</th>
+                <th> Nome Azione</th>
+                <th> Quantità</th>
+                <th> Valore Attuale (€)</th>
+                <th> Variazione %</th>
               </tr>
             </thead>
             <tbody>
@@ -87,7 +87,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
           </Table>
 
           <Alert variant="success" className="mt-3 text-center">
-            💰 **Totale Investito:** €
+            **Totale Investito:** €
             {portfolio.azioni
               .reduce((acc, azione) => acc + (azione.valoreAttuale ?? 0) * (azione.quantita ?? 1), 0)
               .toFixed(2)}

@@ -140,14 +140,14 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                 </Form.Group>
 
                 <Button variant="primary" className="w-100" type="submit">
-                  🔑 Login
+                  Login
                 </Button>
               </Form>
 
               <p className="mt-3">
                 Sei nuovo?{" "}
                 <Button variant="outline-secondary" size="sm" onClick={() => setMostraRegistrazione(true)}>
-                  ✍️ Registrati
+                  Registrati
                 </Button>
               </p>
             </>
@@ -195,14 +195,14 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
                   />
                 </Form.Group>
                 <Button variant="success" className="w-100" type="submit">
-                  ✅ Completa Registrazione
+                  Completa Registrazione
                 </Button>
               </Form>
 
               <p className="mt-3">
                 Hai già un account?{" "}
                 <Button variant="outline-secondary" size="sm" onClick={() => setMostraRegistrazione(false)}>
-                  🔙 Torna al Login
+                  Torna al Login
                 </Button>
               </p>
             </>

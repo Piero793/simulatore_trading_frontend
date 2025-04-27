@@ -33,38 +33,57 @@ const FinancialNews = () => {
   };
 
   return (
-    <div>
+    <div style={{ overflow: "hidden" }}>
+      {" "}
+      {/* Contenitore con overflow hidden */}
       {news.length > 0 ? (
-        <Carousel interval={6000} pause={false}>
-          {news.map((article, index) => (
-            <Carousel.Item key={index}>
-              <div
-                className="d-flex align-items-center"
-                style={{ backgroundColor: "#f8f9fa", padding: "20px", borderRadius: "5px" }}
-              >
-                {article.urlToImage && (
-                  <div style={{ marginRight: "20px", maxWidth: "200px" }}>
-                    <Image src={article.urlToImage} alt={article.title} fluid rounded />
+        <div style={{ height: "27vh" }}>
+          {" "}
+          {/* Altezza fissa per il carosello */}
+          <Carousel interval={6000} pause={false}>
+            {news.map((article, index) => (
+              <Carousel.Item key={index}>
+                <div
+                  className="d-flex align-items-center"
+                  style={{ backgroundColor: "#f8f9fa", padding: "20px", borderRadius: "5px" }}
+                >
+                  {article.urlToImage && (
+                    <div
+                      style={{
+                        marginRight: "20px",
+                        maxWidth: "200px",
+                        height: "15vh",
+                        overflow: "hidden",
+                      }}
+                    >
+                      <Image
+                        src={article.urlToImage}
+                        alt={article.title}
+                        fluid
+                        rounded
+                        style={{ objectFit: "cover", height: "100%" }}
+                      />
+                    </div>
+                  )}
+                  <div>
+                    <a
+                      href={article.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <h3>{article.title}</h3>
+                    </a>
+                    <p>{article.description}</p>
+                    <p className="text-muted">
+                      Fonte: {article.source.name} - Pubblicato il: {formatDate(article.publishedAt)}
+                    </p>
                   </div>
-                )}
-                <div>
-                  <a
-                    href={article.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: "none", color: "inherit" }}
-                  >
-                    <h3>{article.title}</h3>
-                  </a>
-                  <p>{article.description}</p>
-                  <p className="text-muted">
-                    Fonte: {article.source.name} - Pubblicato il: {formatDate(article.publishedAt)}
-                  </p>
                 </div>
-              </div>
-            </Carousel.Item>
-          ))}
-        </Carousel>
+              </Carousel.Item>
+            ))}
+          </Carousel>
+        </div>
       ) : (
         <p>Caricamento delle ultime notizie...</p>
       )}
