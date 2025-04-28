@@ -9,7 +9,7 @@ const Footer = ({ autenticato }) => {
       <Container>
         <Row className="align-items-center">
           <Col md={4} className="text-center text-md-start">
-            <p className="mb-0">© {new Date().getFullYear()} Simulatore Trading. Tutti i diritti riservati.</p>
+            <p className="mb-0">© {new Date().getFullYear()} SimuTrade X. Tutti i diritti riservati.</p>
           </Col>
 
           {autenticato && (

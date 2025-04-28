@@ -108,7 +108,7 @@ const Home = ({ setAutenticato, setUtenteLoggato }) => {
     <Container className="text-center my-5">
       <Row className="justify-content-center">
         <Col md={6}>
-          <h1 className="fw-bold mb-4"> Benvenuto nel Simulatore di Trading</h1>
+          <h1 className="fw-bold mb-4"> Benvenuto in SimuTrade X</h1>
           <p className="text-secondary">Accedi alla tua Dashboard per monitorare il mercato e simulare investimenti.</p>
 
           {errore && <Alert variant="danger">{errore}</Alert>}

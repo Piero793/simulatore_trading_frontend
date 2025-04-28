@@ -6,7 +6,7 @@ const CustomNavbar = ({ autenticato, setAutenticato, utente }) => (
   <Navbar bg="black" variant="dark" expand="lg" className="custom-navbar shadow-lg py-3">
     <Container>
       <Navbar.Brand as={Link} to="/" className="fw-bold text-light">
-        Simulatore Trading
+        SimuTrade X
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar-nav" />
       <Navbar.Collapse id="navbar-nav">
