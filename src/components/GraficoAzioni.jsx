@@ -153,7 +153,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
 
   const chartData = useMemo(
     () => ({
-      labels: datiFiltrati.map((_, index) => `Punto ${index + 1}`),
+      labels: datiFiltrati.map((_, index) => ` ${index + 1}`),
       datasets: [
         {
           label: "📈 Prezzo Azione (€)",

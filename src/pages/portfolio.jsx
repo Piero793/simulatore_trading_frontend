@@ -160,7 +160,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
           </Table>
 
           <Alert variant="success" className="mt-3 text-center">
-            **Totale Investito:** €
+            Totale Investito: €
             {portfolio.azioni
               .reduce((acc, azione) => acc + (azione.valoreAttuale ?? 0) * (azione.quantita ?? 1), 0)
               .toFixed(2)}

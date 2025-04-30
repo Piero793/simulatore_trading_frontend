@@ -34,7 +34,7 @@ const CustomNavbar = ({ autenticato, setAutenticato, utente }) => (
               </Nav.Link>
             ) : (
               <Nav.Link as={Link} to="/" className="text-light">
-                Login/Registrazione
+                {/* Login/Registrazione */}
               </Nav.Link>
             )}
           </Nav>
