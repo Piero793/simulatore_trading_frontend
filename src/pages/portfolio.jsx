@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Table, Container, Spinner, Alert, Card } from "react-bootstrap";
 import PropTypes from "prop-types";
 import DettaglioAzione from "../components/DettaglioAzione";
+import { useNavigate } from "react-router-dom";
 
 const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
   const [portfolio, setPortfolio] = useState(null);
@@ -10,42 +11,114 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
   const [error, setError] = useState(null);
   const [transazioniPortfolio, setTransazioniPortfolio] = useState([]);
 
+  const navigate = useNavigate();
+
+  const getJwtToken = () => {
+    return localStorage.getItem("jwtToken");
+  };
+
+  const handleAuthError = useCallback(
+    (status) => {
+      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
+      localStorage.removeItem("jwtToken"); // Rimuove il token
+      navigate("/");
+      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
+    },
+    [navigate]
+  );
+
   useEffect(() => {
+    // Questo controllo è importante per evitare chiamate API con un nome utente non definito o vuoto.
+    if (!utenteLoggato?.nome || typeof utenteLoggato.nome !== "string" || utenteLoggato.nome.trim() === "") {
+      console.log("DEBUG - utenteLoggato?.nome non definito, vuoto o non valido. Non recupero portfolio.");
+      setLoading(false);
+      setError("Utente non definito o non valido. Effettua il login.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    console.log("DEBUG - Nome utente per la richiesta portfolio:", utenteLoggato?.nome); // Verifica il nome utente
+    const token = getJwtToken();
+    if (!token) {
+      handleAuthError(401);
+      setLoading(false);
+      return;
+    }
 
-    fetch(`http://localhost:8080/api/portfolio?nomeUtente=${utenteLoggato?.nome}`)
+    console.log("DEBUG - Nome utente VALIDO per la richiesta portfolio:", utenteLoggato.nome);
+
+    console.log(`DEBUG - Effettuo fetch GET su /api/portfolio con nomeUtente=${utenteLoggato.nome}`);
+    fetch(`http://localhost:8080/api/portfolio?nomeUtente=${utenteLoggato.nome}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError(response.status);
+          return null;
+        }
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.error(
+              "Errore 404: Endpoint Portfolio non trovato nel backend O Portfolio non trovato per l'utente."
+            );
+            throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Portfolio non esistente`);
+          }
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
         return response.json();
       })
       .then((data) => {
-        console.log("DEBUG - Portfolio ricevuto:", data);
-        setPortfolio(data);
-        setLoading(false);
+        if (data !== null) {
+          console.log("DEBUG - Portfolio ricevuto:", data);
+          setPortfolio(data);
+        }
       })
       .catch((error) => {
         console.error("Errore nel recupero del portfolio:", error);
-        setError("❌ Errore nel recupero del portfolio.");
+        setError(`❌ Errore nel recupero del portfolio: ${error.message || error}`);
         setLoading(false);
       });
 
-    // Recupera anche le transazioni specifiche per il portfolio
-    fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato?.nome}`)
+    console.log(`DEBUG - Effettuo fetch GET su /api/transazioni con nomeUtente=${utenteLoggato.nome}`);
+    fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato.nome}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
       .then((response) => {
-        if (!response.ok) throw new Error(`Errore HTTP: ${response.status}`);
+        if (response.status === 401 || response.status === 403) {
+          handleAuthError(response.status);
+          return null;
+        }
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.error(
+              "Errore 404: Endpoint Transazioni non trovato nel backend O Transazioni non trovate per l'utente."
+            );
+            throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Transazioni non esistenti`);
+          }
+          throw new Error(`Errore HTTP: ${response.status}`);
+        }
         return response.json();
       })
       .then((data) => {
-        console.log("DEBUG - Transazioni ricevute per il portfolio:", data);
-        setTransazioniPortfolio(data);
+        if (data !== null) {
+          console.log("DEBUG - Transazioni ricevute per il portfolio:", data);
+          setTransazioniPortfolio(data);
+          setLoading(false);
+        }
       })
       .catch((error) => {
         console.error("Errore nel recupero delle transazioni per il portfolio:", error);
+        setError(`❌ Errore nel recupero delle transazioni: ${error.message || error}`);
+        setLoading(false);
       });
-  }, [aggiornaPortfolio, utenteLoggato?.nome]);
+  }, [aggiornaPortfolio, utenteLoggato?.nome, handleAuthError]);
 
   return (
     <Container className="portfolio-container">

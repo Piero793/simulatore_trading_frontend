@@ -4,65 +4,92 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 
 const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
-  console.log("DEBUG - Prop utenteLoggato ricevuta in Simulazione:", utenteLoggato);
+  const [azioni, setAzioni] = useState([]);
+  const [azioneSelezionata, setAzioneSelezionata] = useState(null);
+  const [quantita, setQuantita] = useState(1);
+  const [saldo, setSaldo] = useState(null);
+  const [messaggio, setMessaggio] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [countdown, setCountdown] = useState(60);
+  const [tipoTransazione, setTipoTransazione] = useState("");
+  const navigate = useNavigate();
 
-  const [azioni, setAzioni] = useState([]); // Stato per la lista di azioni disponibili
-  const [azioneSelezionata, setAzioneSelezionata] = useState(null); // Stato per l'azione scelta
-  const [quantita, setQuantita] = useState(1); // Stato per la quantità da acquistare/vendere
-  const [saldo, setSaldo] = useState(null); // Stato per il saldo utente, inizialmente null
-  const [messaggio, setMessaggio] = useState(""); // Stato per i messaggi di feedback
-  const [showModal, setShowModal] = useState(false); // Stato per mostrare/nascondere il modale di conferma
-  const [countdown, setCountdown] = useState(60); // Stato per il timer del modale
-  const [tipoTransazione, setTipoTransazione] = useState(""); // Stato per il tipo di operazione
-  const navigate = useNavigate(); // Hook per la navigazione
+  const getJwtToken = () => localStorage.getItem("jwtToken");
 
-  // Funzione per recuperare il saldo dell'utente dal backend
+  const handleAuthError = useCallback(
+    (status) => {
+      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
+      localStorage.removeItem("jwtToken");
+      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
+      navigate("/");
+    },
+    [navigate]
+  );
+
   const fetchSaldo = useCallback(async () => {
-    if (utenteLoggato?.nome) {
-      try {
-        const response = await fetch(`http://localhost:8080/api/utenti/saldo/${utenteLoggato.nome}`);
-        if (response.ok) {
-          const data = await response.json();
-          setSaldo(data.saldo);
-        } else {
-          console.error("Errore nel recupero del saldo:", response.status);
-          setMessaggio("⚠️ Errore nel recupero del saldo.");
-        }
-      } catch (error) {
-        console.error("Errore durante la comunicazione per il saldo:", error);
-        setMessaggio("⚠️ Errore di comunicazione con il server per il saldo.");
+    const token = getJwtToken();
+    if (!token) return handleAuthError(401);
+    if (!utenteLoggato?.nome) return;
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/utenti/saldo/${utenteLoggato.nome}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 401 || response.status === 403) return handleAuthError(response.status);
+      if (response.ok) {
+        const data = await response.json();
+        setSaldo(data.saldo);
+      } else {
+        setMessaggio("⚠️ Errore nel recupero del saldo.");
       }
+    } catch (error) {
+      console.error("Errore durante la comunicazione per il saldo:", error);
+      setMessaggio("⚠️ Errore di comunicazione con il server per il saldo.");
     }
-  }, [utenteLoggato?.nome]);
+  }, [utenteLoggato?.nome, handleAuthError]);
 
-  // Effetto per il recuperaro della lista di azioni dal backend e del saldo
   useEffect(() => {
-    Promise.all([fetch("http://localhost:8080/api/azioni").then((response) => response.json()), fetchSaldo()])
-      .then(([azioniData]) => {
-        setAzioni(azioniData);
-      })
-      .catch((error) => console.error("Errore nel recupero dei dati:", error));
-  }, [fetchSaldo]);
+    const token = getJwtToken();
+    if (!token) return handleAuthError(401);
 
-  // Effetto per gestire il countdown e chiusura automatica del modale
+    const fetchAzioni = fetch("http://localhost:8080/api/azioni", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    }).then((res) => {
+      if (res.status === 401 || res.status === 403) return handleAuthError(res.status);
+      if (!res.ok) throw new Error(`Errore API Azioni: ${res.status}`);
+      return res.json();
+    });
+
+    Promise.all([fetchAzioni, fetchSaldo()])
+      .then(([azioniData]) => azioniData && setAzioni(azioniData))
+      .catch((err) => console.error("Errore recupero dati:", err));
+  }, [fetchSaldo, handleAuthError]);
+
   useEffect(() => {
-    let timer;
+    let timer, timeout;
     if (showModal) {
-      setCountdown(60); // Reset del timer a 60 secondi
-      timer = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-
-      // Dopo 60 secondi, il modale si chiude automaticamente
-      setTimeout(() => {
+      setCountdown(60);
+      timer = setInterval(() => setCountdown((prev) => prev - 1), 1000);
+      timeout = setTimeout(() => {
         setShowModal(false);
+        setMessaggio("Transazione annullata per timeout.");
       }, 60000);
     }
-    return () => clearInterval(timer); // Pulizia del timer quando il modale si chiude
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(timeout);
+    };
   }, [showModal]);
 
-  // Funzione per aggiornare il portfolio dell'utente
-  const aggiornaPortfolio = () => {
+  const triggerPortfolioUpdate = () => {
     if (typeof setAggiornaPortfolio === "function") {
       setAggiornaPortfolio((prev) => prev + 1);
     } else {
@@ -70,56 +97,67 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
     }
   };
 
-  // Funzione per avviare il processo di conferma dell'acquisto o vendita
   const avviaConferma = (tipo) => {
-    if (!azioneSelezionata) {
-      setMessaggio("⚠️ Seleziona un'azione!");
-      return;
+    if (!azioneSelezionata) return setMessaggio("⚠️ Seleziona un'azione!");
+    const valoreTotale = quantita * azioneSelezionata.valoreAttuale;
+    if (tipo === "Acquisto" && saldo !== null && valoreTotale > saldo) {
+      return setMessaggio("🚫 Saldo insufficiente per l'acquisto!");
     }
     setTipoTransazione(tipo);
     setShowModal(true);
+    setMessaggio("");
   };
 
-  // Funzione per gestire la transazione finale
   const handleTransazione = async () => {
-    if (!azioneSelezionata) {
-      setMessaggio("⚠️ Seleziona un'azione!");
+    if (!azioneSelezionata || !utenteLoggato?.portfolioId) {
+      setMessaggio("🚫 Errore: dati insufficienti per completare la transazione.");
+      setShowModal(false);
       return;
     }
 
-    const valoreTotale = quantita * azioneSelezionata.valoreAttuale;
+    const token = getJwtToken();
+    if (!token) {
+      handleAuthError(401);
+      setShowModal(false);
+      return;
+    }
 
     const transazione = {
       tipoTransazione,
       quantita,
       prezzoUnitario: azioneSelezionata.valoreAttuale,
       azioneId: azioneSelezionata.id,
-      nomeUtente: utenteLoggato?.nome, // Usa utenteLoggato?.nome
+      portfolioId: utenteLoggato.portfolioId,
     };
 
     try {
       const response = await fetch("http://localhost:8080/api/transazioni", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(transazione),
       });
 
+      if (response.status === 401 || response.status === 403) return handleAuthError(response.status);
       if (response.ok) {
         setMessaggio(
-          `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${valoreTotale.toFixed(2)}`
+          `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${(
+            quantita * azioneSelezionata.valoreAttuale
+          ).toFixed(2)}`
         );
-        aggiornaPortfolio();
-        setShowModal(false); // Chiude il modale dopo la conferma
-        fetchSaldo(); // Aggiorna il saldo dopo la transazione
-        navigate("/portfolio"); // Reindirizza al Portfolio
+        triggerPortfolioUpdate();
+        setShowModal(false);
+        fetchSaldo();
+        navigate("/portfolio");
       } else {
-        // Gestisci gli errori dal backend
-        const errorData = await response.text(); // O response.json() se il backend invia JSON per gli errori
+        const errorData = await response.text();
         setMessaggio(`🚫 Errore nella transazione: ${errorData}`);
-        setShowModal(false); // Chiude il modale anche in caso di errore
+        setShowModal(false);
       }
     } catch (error) {
-      console.error("Errore durante la comunicazione con il backend:", error);
+      console.error("Errore durante la comunicazione per la transazione:", error);
       setMessaggio("⚠️ Errore di comunicazione con il server.");
       setShowModal(false);
     }
@@ -127,13 +165,13 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
   return (
     <Container className="simulazione-container">
-      <h2 className="text-center my-4"> Simulazione Acquisto/Vendita</h2>
+      <h2 className="text-center my-4">Simulazione Acquisto/Vendita</h2>
 
       <Row className="justify-content-center">
         <Col md={6}>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label> Seleziona azione</Form.Label>
+              <Form.Label>Seleziona azione</Form.Label>
               <Form.Select onChange={(e) => setAzioneSelezionata(azioni.find((a) => a.id === Number(e.target.value)))}>
                 <option value="">Scegli azione...</option>
                 {azioni.map((azione) => (
@@ -144,7 +182,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
               </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label> Quantità</Form.Label>
+              <Form.Label>Quantità</Form.Label>
               <Form.Control
                 type="number"
                 value={quantita}
@@ -164,41 +202,34 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
           </div>
 
           {messaggio && (
-            <Alert variant="info" className="mt-4">
+            <Alert variant="info" className="mt-4 text-center">
               {messaggio}
             </Alert>
           )}
-          {saldo !== null && (
-            <Alert variant="secondary" className="mt-2">
-              Saldo Disponibile: €{saldo.toFixed(2)}
-            </Alert>
-          )}
-          {saldo === null && (
-            <Alert variant="warning" className="mt-2">
-              Caricamento saldo...
-            </Alert>
-          )}
-
-          <Modal show={showModal} onHide={() => setShowModal(false)}>
-            <Modal.Header closeButton>
-              <Modal.Title>Conferma {tipoTransazione}</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-              Hai scelto di {tipoTransazione.toLowerCase()} {quantita} azioni di {azioneSelezionata?.nome}
-              al prezzo totale di €{(quantita * azioneSelezionata?.valoreAttuale).toFixed(2)}. Conferma entro
-              {countdown} secondi.
-            </Modal.Body>
-            <Modal.Footer>
-              <Button variant="secondary" onClick={() => setShowModal(false)}>
-                Annulla
-              </Button>
-              <Button variant="success" onClick={handleTransazione}>
-                Conferma
-              </Button>
-            </Modal.Footer>
-          </Modal>
         </Col>
       </Row>
+
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Conferma {tipoTransazione}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Confermi di voler {tipoTransazione.toLowerCase()} {quantita} azioni di{" "}
+            <strong>{azioneSelezionata?.nome}</strong>?
+          </p>
+          <p>Prezzo totale: €{(quantita * (azioneSelezionata?.valoreAttuale || 0)).toFixed(2)}</p>
+          <p className="text-muted">La conferma scadrà tra {countdown} secondi.</p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Annulla
+          </Button>
+          <Button variant="primary" onClick={handleTransazione}>
+            Conferma
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };
@@ -207,6 +238,8 @@ Simulazione.propTypes = {
   setAggiornaPortfolio: PropTypes.func.isRequired,
   utenteLoggato: PropTypes.shape({
     nome: PropTypes.string,
+    id: PropTypes.number,
+    portfolioId: PropTypes.number,
   }),
 };
 

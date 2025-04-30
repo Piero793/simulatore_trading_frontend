@@ -1,7 +1,9 @@
 import { Line } from "react-chartjs-2";
 import PropTypes from "prop-types";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import zoomPlugin from "chartjs-plugin-zoom";
+import { useNavigate } from "react-router-dom";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -24,17 +26,60 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
   const [transazioniValidi, setTransazioniValidi] = useState([]);
   const [previsione, setPrevisione] = useState(null);
 
+  const navigate = useNavigate();
+
+  const getJwtToken = () => {
+    return localStorage.getItem("jwtToken");
+  };
+
+  // Funzione per gestire gli errori di autenticazione/autorizzazione
+  // Rimuove il token non valido e reindirizza al login.
+  const handleAuthError = useCallback(
+    (status) => {
+      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
+      localStorage.removeItem("jwtToken"); // Rimuove il token
+      navigate("/"); // Reindirizza alla pagina di login
+      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
+    },
+    [navigate]
+  );
+
   useEffect(() => {
     setDatiValidi(Array.isArray(data) ? [...data] : []);
     setTransazioniValidi(Array.isArray(transazioni) ? [...transazioni] : []);
 
     if (assetId) {
-      fetch(`http://localhost:8080/api/previsione/${assetId}`)
-        .then((response) => response.json())
-        .then((data) => setPrevisione(data))
+      const token = getJwtToken();
+      if (!token) {
+        handleAuthError(401);
+        return;
+      }
+
+      fetch(`http://localhost:8080/api/previsione/${assetId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          // Controllo lo stato della risposta per errori di autenticazione/autorizzazione
+          if (response.status === 401 || response.status === 403) {
+            handleAuthError(response.status);
+            return null;
+          }
+          if (!response.ok) {
+            throw new Error(`Errore HTTP: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then((data) => {
+          if (data !== null) {
+            setPrevisione(data);
+          }
+        })
         .catch((error) => console.error("Errore nel recupero della previsione:", error));
     }
-  }, [data, transazioni, assetId]);
+  }, [data, transazioni, assetId, handleAuthError]);
 
   const datiFiltrati = useMemo(() => {
     if (datiValidi.length === 0) return [];
@@ -47,11 +92,12 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
     };
 
     const numDati = mappingIntervalli[intervallo] || datiValidi.length;
-    return datiValidi.slice(-Math.min(numDati, datiValidi.length)); // Gestisce intervalli
+    return datiValidi.slice(-Math.min(numDati, datiValidi.length));
   }, [intervallo, datiValidi]);
 
   const transazioniDataset = useMemo(() => {
     return transazioniValidi.map((transazione, index) => ({
+      // L'indice 'x' potrebbe non corrispondere correttamente ai dati filtrati per intervallo.
       x: index,
       y: transazione.prezzoUnitario,
       backgroundColor: transazione.tipoTransazione === "Acquisto" ? "#28a745" : "#dc3545",
@@ -61,43 +107,53 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
   }, [transazioniValidi]);
 
   const previsioneDataset = useMemo(() => {
-    return previsione
-      ? [
-          {
-            label: " Previsione Prezzo (€)",
-            data: [datiFiltrati[datiFiltrati.length - 1]?.valoreAttuale, previsione],
-            borderColor: "#ff9800",
-            borderDash: [5, 5],
-            tension: 0.5,
-            pointRadius: 6,
-            showLine: true,
-          },
-        ]
-      : [];
+    if (!previsione || datiFiltrati.length === 0) return [];
+
+    // La previsione si collega all'ultimo punto dei dati filtrati
+    return [
+      {
+        label: " Previsione Prezzo (€)",
+        data: [
+          { x: datiFiltrati.length - 1, y: datiFiltrati[datiFiltrati.length - 1]?.valoreAttuale }, // Ultimo punto dati
+          { x: datiFiltrati.length, y: previsione }, // Punto previsione (un indice avanti)
+        ],
+        borderColor: "#ff9800",
+        borderDash: [5, 5],
+        tension: 0.5,
+        pointRadius: 6,
+        showLine: true,
+        fill: false,
+      },
+    ];
   }, [previsione, datiFiltrati]);
 
   const trendlineDataset = useMemo(() => {
     if (datiFiltrati.length < 2) return [];
 
-    const start = datiFiltrati[0]?.valoreAttuale;
-    const end = datiFiltrati[datiFiltrati.length - 1]?.valoreAttuale;
+    // Calcola i punti iniziale e finale per la trendline sui dati filtrati
+    const startPoint = datiFiltrati[0];
+    const endPoint = datiFiltrati[datiFiltrati.length - 1];
 
     return [
       {
         label: "📉 Trend Line (€)",
-        data: [start, end],
+        data: [
+          { x: 0, y: startPoint?.valoreAttuale }, // Primo punto dei dati filtrati
+          { x: datiFiltrati.length - 1, y: endPoint?.valoreAttuale }, // Ultimo punto dei dati filtrati
+        ],
         borderColor: "#17a2b8",
         borderDash: [3, 3],
         tension: 0.2,
         pointRadius: 0,
         showLine: true,
+        fill: false,
       },
     ];
   }, [datiFiltrati]);
 
   const chartData = useMemo(
     () => ({
-      labels: [...datiFiltrati.map((_, index) => `Punto ${index + 1}`), "Prossima previsione"],
+      labels: datiFiltrati.map((_, index) => `Punto ${index + 1}`),
       datasets: [
         {
           label: "📈 Prezzo Azione (€)",
@@ -109,6 +165,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
           fill: false,
           showLine: true,
         },
+        // Aggiungo i dataset di previsione e trendline
         ...previsioneDataset,
         ...trendlineDataset,
         {
@@ -116,6 +173,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
           data: transazioniDataset,
           pointStyle: "circle",
           showLine: false,
+          type: "scatter",
         },
       ],
     }),
@@ -142,36 +200,58 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
         intersect: false,
         callbacks: {
           label: (tooltipItem) => {
-            const valore = typeof tooltipItem.raw === "number" ? tooltipItem.raw.toFixed(2) : "N/A";
-            return `💰 Prezzo: €${valore}`;
+            // Personalizzo la label del tooltip per mostrare il valore corretto
+            if (tooltipItem.dataset.label === " Transazioni (Acquisto/Vendita)") {
+              return `${tooltipItem.dataset.label}: €${tooltipItem.raw.y.toFixed(2)}`;
+            }
+            const valore =
+              typeof tooltipItem.raw === "number"
+                ? tooltipItem.raw.toFixed(2)
+                : typeof tooltipItem.raw?.y === "number"
+                ? tooltipItem.raw.y.toFixed(2)
+                : "N/A";
+            return `${tooltipItem.dataset.label}: €${valore}`;
+          },
+          title: (tooltipItems) => {
+            return tooltipItems[0].label;
           },
         },
+      },
+      legend: {
+        display: true,
       },
     },
     maintainAspectRatio: false,
     responsive: true,
     scales: {
-      x: { title: { display: true, text: "📌 Indici dati" } },
+      x: {
+        title: { display: true, text: "📌 Indici dati" },
+      },
       y: { title: { display: true, text: "💰 Prezzo (€)" }, beginAtZero: false },
     },
   };
 
   const resetZoom = () => {
-    chartRef.current.resetZoom();
+    if (chartRef.current) {
+      chartRef.current.resetZoom();
+    }
   };
 
   const exportChart = () => {
     const chart = chartRef.current;
-    const link = document.createElement("a");
-    link.href = chart.toBase64Image();
-    link.download = `grafico_azioni_${assetId}.png`;
-    link.click();
+    if (chart) {
+      const link = document.createElement("a");
+      link.href = chart.toBase64Image();
+      link.download = `grafico_azioni_${assetId}.png`;
+      link.click();
+    }
   };
 
   return (
     <div className="grafico-container">
       <div className="text-center mb-3">
-        {["1G", "1S", "1M", "1A"].map((tempo) => (
+        {/* Bottoni per selezionare l'intervallo di tempo */}
+        {["1G", "1S", "1M", "1A", "ALL"].map((tempo) => (
           <button
             key={tempo}
             className={`btn mx-1 ${intervallo === tempo ? "btn-primary" : "btn-outline-primary"}`}
@@ -183,6 +263,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
       </div>
 
       <div className=" mb-3">
+        {/* Bottoni per gestire zoom ed export */}
         <button className="btn btn-outline-secondary me-3" onClick={resetZoom}>
           Reset Zoom
         </button>
@@ -191,6 +272,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
         </button>
       </div>
 
+      {/* Renderizza il grafico solo se ci sono dati validi */}
       {datiValidi.length > 0 ? (
         <Line ref={chartRef} data={chartData} options={chartOptions} />
       ) : (
@@ -199,6 +281,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
     </div>
   );
 };
+
 GraficoAzioni.propTypes = {
   data: PropTypes.arrayOf(
     PropTypes.shape({

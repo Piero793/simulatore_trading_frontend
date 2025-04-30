@@ -30,7 +30,7 @@ body {
   text-align: center;
   padding: 1.2rem 0;
   margin-top: 2rem; /* Aumentato il margine superiore per spostare il footer più in basso */
-  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1); /* Aggiunto un leggero effetto sopra il footer */
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
 }
 
 h1,
@@ -46,22 +46,22 @@ h3 {
 
 /* ========================= NAVBAR ========================= */
 .custom-navbar {
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15); /* Ombra più evidente per separare la navbar */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 .custom-navbar .navbar-brand {
-  font-size: 1.6rem; /* Leggermente più grande per evidenziare il brand */
+  font-size: 1.6rem;
   font-weight: bold;
   color: #ffffff;
 }
 
 .custom-navbar .nav-link {
-  color: rgba(255, 255, 255, 0.85); /* Migliore contrasto sui link */
+  color: rgba(255, 255, 255, 0.85);
   transition: color 0.3s ease;
 }
 
 .custom-navbar .nav-link:hover {
-  color: #f8f9fa; /* Colore chiaro al passaggio del mouse */
+  color: #f8f9fa;
 }
 
 /* ========================= DASHBOARD ========================= */
@@ -76,7 +76,7 @@ h3 {
 .dashboard-card {
   border: none;
   border-radius: 12px;
-  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2); /* Maggiore profondità */
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
 

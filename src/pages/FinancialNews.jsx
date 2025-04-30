@@ -39,7 +39,6 @@ const FinancialNews = () => {
       {news.length > 0 ? (
         <div style={{ height: "27vh" }}>
           {" "}
-          {/* Altezza fissa per il carosello */}
           <Carousel interval={6000} pause={false}>
             {news.map((article, index) => (
               <Carousel.Item key={index}>
