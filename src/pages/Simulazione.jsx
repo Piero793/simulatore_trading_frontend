@@ -169,6 +169,15 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
       <Row className="justify-content-center">
         <Col md={6}>
+          <div className="mb-3 text-center">
+            {saldo !== null ? (
+              <p>
+                Saldo virtuale disponibile: <strong>€{saldo.toFixed(2)}</strong>
+              </p>
+            ) : (
+              <p>Caricamento saldo...</p>
+            )}
+          </div>
           <Form>
             <Form.Group className="mb-3">
               <Form.Label>Seleziona azione</Form.Label>
