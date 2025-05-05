@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import DettaglioAzione from "../components/DettaglioAzione";
 import { useNavigate } from "react-router-dom";
 
-const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
+const Portfolio = ({ aggiornaPortfolio }) => {
   const [portfolio, setPortfolio] = useState(null);
   const [azioneSelezionata, setAzioneSelezionata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -28,14 +28,6 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
   );
 
   useEffect(() => {
-    // Questo controllo è importante per evitare chiamate API con un nome utente non definito o vuoto.
-    if (!utenteLoggato?.nome || typeof utenteLoggato.nome !== "string" || utenteLoggato.nome.trim() === "") {
-      console.log("DEBUG - utenteLoggato?.nome non definito, vuoto o non valido. Non recupero portfolio.");
-      setLoading(false);
-      setError("Utente non definito o non valido. Effettua il login.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -46,10 +38,8 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
       return;
     }
 
-    console.log("DEBUG - Nome utente VALIDO per la richiesta portfolio:", utenteLoggato.nome);
-
-    console.log(`DEBUG - Effettuo fetch GET su /api/portfolio con nomeUtente=${utenteLoggato.nome}`);
-    fetch(`http://localhost:8080/api/portfolio?nomeUtente=${utenteLoggato.nome}`, {
+    console.log("DEBUG - Effettuo fetch GET su /api/portfolio/me");
+    fetch("http://localhost:8080/api/portfolio/me", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -63,7 +53,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         if (!response.ok) {
           if (response.status === 404) {
             console.error(
-              "Errore 404: Endpoint Portfolio non trovato nel backend O Portfolio non trovato per l'utente."
+              "Errore 404: Endpoint /api/portfolio/me non trovato nel backend O Portfolio non trovato per l'utente."
             );
             throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Portfolio non esistente`);
           }
@@ -83,8 +73,8 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         setLoading(false);
       });
 
-    console.log(`DEBUG - Effettuo fetch GET su /api/transazioni con nomeUtente=${utenteLoggato.nome}`);
-    fetch(`http://localhost:8080/api/transazioni?nomeUtente=${utenteLoggato.nome}`, {
+    console.log("DEBUG - Effettuo fetch GET su /api/transazioni/me");
+    fetch("http://localhost:8080/api/transazioni/me", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -98,7 +88,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         if (!response.ok) {
           if (response.status === 404) {
             console.error(
-              "Errore 404: Endpoint Transazioni non trovato nel backend O Transazioni non trovate per l'utente."
+              "Errore 404: Endpoint /api/transazioni/me non trovato nel backend O Transazioni non trovate per l'utente."
             );
             throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Transazioni non esistenti`);
           }
@@ -118,7 +108,9 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         setError(`❌ Errore nel recupero delle transazioni: ${error.message || error}`);
         setLoading(false);
       });
-  }, [aggiornaPortfolio, utenteLoggato?.nome, handleAuthError]);
+  }, [aggiornaPortfolio, handleAuthError]);
+
+  const haAzioni = portfolio?.azioni?.some((azione) => azione.quantita > 0);
 
   return (
     <Container className="portfolio-container">
@@ -130,7 +122,7 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
         </div>
       ) : error ? (
         <Alert variant="danger">{error}</Alert>
-      ) : portfolio && portfolio.azioni?.length > 0 ? (
+      ) : haAzioni ? (
         <>
           <Table striped bordered hover responsive className="text-center">
             <thead className="table-dark">
@@ -142,20 +134,22 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
               </tr>
             </thead>
             <tbody>
-              {portfolio.azioni.map((azione, index) => (
-                <tr key={index} onClick={() => setAzioneSelezionata(azione)} style={{ cursor: "pointer" }}>
-                  <td>{azione.nome || "N/D"}</td>
-                  <td>{azione.quantita ?? "N/D"}</td>
-                  <td>
-                    {azione.valoreAttuale && azione.quantita
-                      ? (azione.valoreAttuale * azione.quantita).toFixed(2)
-                      : "N/D"}
-                  </td>
-                  <td className={azione.variazione >= 0 ? "text-success" : "text-danger"}>
-                    {azione.variazione ? azione.variazione.toFixed(2) : "N/D"}
-                  </td>
-                </tr>
-              ))}
+              {portfolio.azioni
+                .filter((azione) => azione.quantita > 0)
+                .map((azione, index) => (
+                  <tr key={index} onClick={() => setAzioneSelezionata(azione)} style={{ cursor: "pointer" }}>
+                    <td>{azione.nome || "N/D"}</td>
+                    <td>{azione.quantita ?? "N/D"}</td>
+                    <td>
+                      {azione.valoreAttuale && azione.quantita
+                        ? (azione.valoreAttuale * azione.quantita).toFixed(2)
+                        : "N/D"}
+                    </td>
+                    <td className={azione.variazione >= 0 ? "text-success" : "text-danger"}>
+                      {azione.variazione ? azione.variazione.toFixed(2) : "N/D"}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </Table>
 
@@ -205,10 +199,6 @@ const Portfolio = ({ aggiornaPortfolio, utenteLoggato }) => {
 
 Portfolio.propTypes = {
   aggiornaPortfolio: PropTypes.number.isRequired,
-  utenteLoggato: PropTypes.shape({
-    nome: PropTypes.string.isRequired,
-    id: PropTypes.number,
-  }),
 };
 
 export default Portfolio;

@@ -29,10 +29,9 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   const fetchSaldo = useCallback(async () => {
     const token = getJwtToken();
     if (!token) return handleAuthError(401);
-    if (!utenteLoggato?.nome) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/utenti/saldo/${utenteLoggato.nome}`, {
+      const response = await fetch("http://localhost:8080/api/utenti/saldo", {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -50,7 +49,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       console.error("Errore durante la comunicazione per il saldo:", error);
       setMessaggio("⚠️ Errore di comunicazione con il server per il saldo.");
     }
-  }, [utenteLoggato?.nome, handleAuthError]);
+  }, [handleAuthError]);
 
   useEffect(() => {
     const token = getJwtToken();
@@ -127,7 +126,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       quantita,
       prezzoUnitario: azioneSelezionata.valoreAttuale,
       azioneId: azioneSelezionata.id,
-      portfolioId: utenteLoggato.portfolioId,
+      portfolioId: utenteLoggato.portfolioId, // Verifica che utenteLoggato.portfolioId sia corretto
     };
 
     try {
