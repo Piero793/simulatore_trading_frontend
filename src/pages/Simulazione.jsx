@@ -126,7 +126,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       quantita,
       prezzoUnitario: azioneSelezionata.valoreAttuale,
       azioneId: azioneSelezionata.id,
-      portfolioId: utenteLoggato.portfolioId, // Verifica che utenteLoggato.portfolioId sia corretto
+      portfolioId: utenteLoggato.portfolioId,
     };
 
     try {
