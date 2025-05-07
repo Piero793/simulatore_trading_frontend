@@ -232,7 +232,7 @@ const Dashboard = ({ utenteLoggato }) => {
               <Card className="dashboard-card">
                 <Card.Body>
                   <h2 className="text-center mx-4"> Ultimi Aggiornamenti</h2>
-                  {/* <FinancialNews />*/}
+                  {/* <FinancialNews /> */}
                 </Card.Body>
               </Card>
             </Col>
