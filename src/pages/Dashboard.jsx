@@ -168,9 +168,12 @@ const Dashboard = ({ utenteLoggato }) => {
               <Card className="dashboard-card">
                 <Card.Body>
                   <Card.Title> Andamento del Prezzo delle Azioni</Card.Title>
-                  {/* Passa i dati delle azioni al grafico */}
                   {azioni.length > 0 && assetSelezionato !== null ? (
-                    <GraficoAzioni data={azioni} transazioni={[]} assetId={assetSelezionato} />
+                    <GraficoAzioni
+                      data={azioni.filter((azione) => azione.id === assetSelezionato)}
+                      transazioni={[]}
+                      assetId={assetSelezionato}
+                    />
                   ) : (
                     <p>Seleziona un asset per visualizzare il grafico.</p>
                   )}

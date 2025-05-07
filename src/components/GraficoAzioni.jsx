@@ -19,7 +19,7 @@ import { FaDownload } from "react-icons/fa";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, zoomPlugin);
 
-const GraficoAzioni = ({ data, transazioni, assetId }) => {
+const GraficoAzioni = ({ transazioni, assetId }) => {
   const chartRef = useRef(null); // Gestione zoom/export
   const [intervallo, setIntervallo] = useState("1M");
   const [datiValidi, setDatiValidi] = useState([]);
@@ -45,7 +45,8 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
   );
 
   useEffect(() => {
-    setDatiValidi(Array.isArray(data) ? [...data] : []);
+    console.log("DEBUG - assetId in GraficoAzioni:", assetId);
+    setDatiValidi([]);
     setTransazioniValidi(Array.isArray(transazioni) ? [...transazioni] : []);
 
     if (assetId) {
@@ -55,6 +56,8 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
         return;
       }
 
+      console.log(`DEBUG - Chiamata API a /api/previsione/${assetId}`);
+
       fetch(`http://localhost:8080/api/previsione/${assetId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -62,7 +65,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
         },
       })
         .then((response) => {
-          // Controllo lo stato della risposta per errori di autenticazione/autorizzazione
+          console.log("DEBUG - Risposta API /api/previsione:", response);
           if (response.status === 401 || response.status === 403) {
             handleAuthError(response.status);
             return null;
@@ -72,14 +75,16 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
           }
           return response.json();
         })
-        .then((data) => {
-          if (data !== null) {
-            setPrevisione(data);
+        .then((previsioneData) => {
+          console.log("DEBUG - Dati previsione ricevuti:", previsioneData);
+          if (previsioneData) {
+            setPrevisione(previsioneData);
+            setDatiValidi(Array.isArray(previsioneData) ? [...previsioneData] : []);
           }
         })
         .catch((error) => console.error("Errore nel recupero della previsione:", error));
     }
-  }, [data, transazioni, assetId, handleAuthError]);
+  }, [transazioni, assetId, handleAuthError]);
 
   const datiFiltrati = useMemo(() => {
     if (datiValidi.length === 0) return [];
@@ -97,8 +102,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
 
   const transazioniDataset = useMemo(() => {
     return transazioniValidi.map((transazione, index) => ({
-      // L'indice 'x' potrebbe non corrispondere correttamente ai dati filtrati per intervallo.
-      x: index,
+      x: index, // Potrebbe richiedere una logica più precisa per l'allineamento temporale
       y: transazione.prezzoUnitario,
       backgroundColor: transazione.tipoTransazione === "Acquisto" ? "#28a745" : "#dc3545",
       borderColor: transazione.tipoTransazione === "Acquisto" ? "#28a745" : "#dc3545",
@@ -109,13 +113,21 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
   const previsioneDataset = useMemo(() => {
     if (!previsione || datiFiltrati.length === 0) return [];
 
-    // La previsione si collega all'ultimo punto dei dati filtrati
+    const nextPrevisione =
+      Array.isArray(previsione) && previsione.length > 0
+        ? previsione[previsione.length - 1]?.prezzoPrevisto // Assumendo che l'ultimo elemento sia la previsione futura
+        : null;
+
+    if (nextPrevisione === null) {
+      return [];
+    }
+
     return [
       {
         label: " Previsione Prezzo (€)",
         data: [
-          { x: datiFiltrati.length - 1, y: datiFiltrati[datiFiltrati.length - 1]?.valoreAttuale }, // Ultimo punto dati
-          { x: datiFiltrati.length, y: previsione }, // Punto previsione (un indice avanti)
+          { x: datiFiltrati.length - 1, y: datiFiltrati[datiFiltrati.length - 1]?.prezzoPrevisto }, // Ultimo punto dati
+          { x: datiFiltrati.length, y: nextPrevisione }, // Punto previsione (un indice avanti)
         ],
         borderColor: "#ff9800",
         borderDash: [5, 5],
@@ -138,8 +150,8 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
       {
         label: "📉 Trend Line (€)",
         data: [
-          { x: 0, y: startPoint?.valoreAttuale }, // Primo punto dei dati filtrati
-          { x: datiFiltrati.length - 1, y: endPoint?.valoreAttuale }, // Ultimo punto dei dati filtrati
+          { x: 0, y: startPoint?.prezzoPrevisto }, // Primo punto dei dati filtrati
+          { x: datiFiltrati.length - 1, y: endPoint?.prezzoPrevisto }, // Ultimo punto dei dati filtrati
         ],
         borderColor: "#17a2b8",
         borderDash: [3, 3],
@@ -153,11 +165,11 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
 
   const chartData = useMemo(
     () => ({
-      labels: datiFiltrati.map((_, index) => ` ${index + 1}`),
+      labels: datiFiltrati.map((item) => `Giorno ${item.giorno}`),
       datasets: [
         {
           label: "📈 Prezzo Azione (€)",
-          data: datiFiltrati.map((item) => item.valoreAttuale),
+          data: datiFiltrati.map((item) => item.prezzoPrevisto),
           borderColor: "#007bff",
           backgroundColor: "rgba(0, 123, 255, 0.2)",
           tension: 0.5,
@@ -225,7 +237,7 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
     responsive: true,
     scales: {
       x: {
-        title: { display: true, text: "📌 Indici dati" },
+        title: { display: true, text: "🗓️ Giorno" },
       },
       y: { title: { display: true, text: "💰 Prezzo (€)" }, beginAtZero: false },
     },
@@ -283,19 +295,12 @@ const GraficoAzioni = ({ data, transazioni, assetId }) => {
 };
 
 GraficoAzioni.propTypes = {
-  data: PropTypes.arrayOf(
-    PropTypes.shape({
-      valoreAttuale: PropTypes.number.isRequired,
-    })
-  ).isRequired,
-
   transazioni: PropTypes.arrayOf(
     PropTypes.shape({
       prezzoUnitario: PropTypes.number.isRequired,
       tipoTransazione: PropTypes.string.isRequired,
     })
   ).isRequired,
-
   assetId: PropTypes.number.isRequired,
 };
 

@@ -151,8 +151,22 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
         fetchSaldo();
         navigate("/portfolio");
       } else {
-        const errorData = await response.text();
-        setMessaggio(`🚫 Errore nella transazione: ${errorData}`);
+        try {
+          // Tenta di parsare la risposta come JSON
+          const errorJson = await response.json();
+          if (errorJson && errorJson.message) {
+            setMessaggio(`🚫 Errore nella transazione: ${errorJson.message}`);
+          } else {
+            // Se il parsing JSON fallisce o non c'è il campo 'message', mostra l'errore testuale grezzo
+            const errorText = await response.text();
+            setMessaggio(`🚫 Errore nella transazione: ${errorText}`);
+          }
+        } catch (e) {
+          console.error(e);
+          // Se c'è un errore durante il parsing JSON, mostra l'errore testuale grezzo
+          const errorText = await response.text();
+          setMessaggio(`🚫 Errore nella transazione (parsing fallito): ${errorText}`);
+        }
         setShowModal(false);
       }
     } catch (error) {
