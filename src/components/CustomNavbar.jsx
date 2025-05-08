@@ -2,7 +2,7 @@ import { Navbar, Nav, Container } from "react-bootstrap";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-const CustomNavbar = ({ autenticato, setAutenticato, utente }) => (
+const CustomNavbar = ({ autenticato, handleLogout, utente }) => (
   <Navbar bg="black" variant="dark" expand="lg" className="custom-navbar shadow-lg py-3">
     <Container>
       <Navbar.Brand as={Link} to="/" className="fw-bold text-light">
@@ -29,7 +29,7 @@ const CustomNavbar = ({ autenticato, setAutenticato, utente }) => (
           )}
           <Nav>
             {autenticato ? (
-              <Nav.Link as={Link} to="/" className="text-danger fw-bold" onClick={() => setAutenticato(false)}>
+              <Nav.Link className="text-danger fw-bold" onClick={handleLogout}>
                 Logout {utente && `(${utente})`}
               </Nav.Link>
             ) : (
@@ -44,10 +44,9 @@ const CustomNavbar = ({ autenticato, setAutenticato, utente }) => (
   </Navbar>
 );
 
-// Validazione delle props
 CustomNavbar.propTypes = {
   autenticato: PropTypes.bool.isRequired,
-  setAutenticato: PropTypes.func.isRequired,
+  handleLogout: PropTypes.func.isRequired,
   utente: PropTypes.string,
 };
 
