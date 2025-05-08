@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useNavigate } from "react-router-dom";
+import { fetchPrevisione } from "../service/apiService";
 
 import {
   Chart as ChartJS,
@@ -28,10 +29,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
 
   const navigate = useNavigate();
 
-  const getJwtToken = () => {
-    return sessionStorage.getItem("jwtToken");
-  };
-
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
@@ -46,37 +43,28 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
     setDatiValidi([]);
     setTransazioniValidi(Array.isArray(transazioni) ? [...transazioni] : []);
 
-    if (assetId) {
-      const token = getJwtToken();
-      if (!token) {
-        handleAuthError(401);
-        return;
-      }
-
-      fetch(`http://localhost:8080/api/previsione/${assetId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => {
-          if (response.status === 401 || response.status === 403) {
-            handleAuthError(response.status);
-            return null;
-          }
-          if (!response.ok) {
-            throw new Error(`Errore HTTP: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((previsioneData) => {
+    const loadPrevisione = async () => {
+      if (assetId) {
+        try {
+          const previsioneData = await fetchPrevisione(assetId);
           if (previsioneData) {
             setPrevisione(previsioneData);
             setDatiValidi(Array.isArray(previsioneData) ? [...previsioneData] : []);
           }
-        })
-        .catch((error) => console.error("Errore nel recupero della previsione:", error));
-    }
+        } catch (error) {
+          console.error("Errore nel recupero della previsione:", error);
+          if (
+            error.message === "Token JWT non trovato." ||
+            error.message.includes("401") ||
+            error.message.includes("403")
+          ) {
+            handleAuthError();
+          }
+        }
+      }
+    };
+
+    loadPrevisione();
   }, [transazioni, assetId, handleAuthError]);
 
   const datiFiltrati = useMemo(() => {

@@ -2,6 +2,11 @@ import { Container, Form, Button, Alert, Row, Col, Modal } from "react-bootstrap
 import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchAzioni as fetchAzioniApi,
+  fetchSaldo as fetchSaldoApi,
+  creaTransazione as creaTransazioneApi,
+} from "../service/apiService";
 
 const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   const [azioni, setAzioni] = useState([]);
@@ -14,8 +19,6 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   const [tipoTransazione, setTipoTransazione] = useState("");
   const navigate = useNavigate();
 
-  const getJwtToken = () => sessionStorage.getItem("jwtToken");
-
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
@@ -27,48 +30,36 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   );
 
   const fetchSaldo = useCallback(async () => {
-    const token = getJwtToken();
-    if (!token) return handleAuthError(401);
-
     try {
-      const response = await fetch("http://localhost:8080/api/utenti/saldo", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 401 || response.status === 403) return handleAuthError(response.status);
-      if (response.ok) {
-        const data = await response.json();
-        setSaldo(data.saldo);
-      } else {
-        setMessaggio("⚠️ Errore nel recupero del saldo.");
-      }
+      const data = await fetchSaldoApi();
+      setSaldo(data.saldo);
     } catch (error) {
       console.error("Errore durante la comunicazione per il saldo:", error);
-      setMessaggio("⚠️ Errore di comunicazione con il server per il saldo.");
+      if (error.message === "Token JWT non trovato.") {
+        handleAuthError(401);
+      } else {
+        setMessaggio(`⚠️ Errore nel recupero del saldo: ${error.message}`);
+      }
     }
   }, [handleAuthError]);
 
   useEffect(() => {
-    const token = getJwtToken();
-    if (!token) return handleAuthError(401);
+    const fetchData = async () => {
+      try {
+        const azioniData = await fetchAzioniApi();
+        setAzioni(azioniData);
+        await fetchSaldo();
+      } catch (error) {
+        console.error("Errore recupero dati:", error);
+        if (error.message === "Token JWT non trovato.") {
+          handleAuthError(401);
+        } else {
+          setMessaggio(`⚠️ Errore nel caricamento dei dati: ${error.message}`);
+        }
+      }
+    };
 
-    const fetchAzioni = fetch("http://localhost:8080/api/azioni", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    }).then((res) => {
-      if (res.status === 401 || res.status === 403) return handleAuthError(res.status);
-      if (!res.ok) throw new Error(`Errore API Azioni: ${res.status}`);
-      return res.json();
-    });
-
-    Promise.all([fetchAzioni, fetchSaldo()])
-      .then(([azioniData]) => azioniData && setAzioni(azioniData))
-      .catch((err) => console.error("Errore recupero dati:", err));
+    fetchData();
   }, [fetchSaldo, handleAuthError]);
 
   useEffect(() => {
@@ -114,13 +105,6 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       return;
     }
 
-    const token = getJwtToken();
-    if (!token) {
-      handleAuthError(401);
-      setShowModal(false);
-      return;
-    }
-
     const transazione = {
       tipoTransazione,
       quantita,
@@ -130,45 +114,25 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/transazioni", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(transazione),
-      });
-
-      if (response.status === 401 || response.status === 403) return handleAuthError(response.status);
-      if (response.ok) {
-        setMessaggio(
-          `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${(
-            quantita * azioneSelezionata.valoreAttuale
-          ).toFixed(2)}`
-        );
-        triggerPortfolioUpdate();
-        setShowModal(false);
-        fetchSaldo();
-        navigate("/portfolio");
-      } else {
-        try {
-          const errorJson = await response.json();
-          if (errorJson && errorJson.message) {
-            setMessaggio(`🚫 Errore nella transazione: ${errorJson.message}`);
-          } else {
-            const errorText = await response.text();
-            setMessaggio(`🚫 Errore nella transazione: ${errorText}`);
-          }
-        } catch (e) {
-          console.error(e);
-          const errorText = await response.text();
-          setMessaggio(`🚫 Errore nella transazione (parsing fallito): ${errorText}`);
-        }
-        setShowModal(false);
-      }
+      await creaTransazioneApi(transazione);
+      setMessaggio(
+        `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${(
+          quantita * azioneSelezionata.valoreAttuale
+        ).toFixed(2)}`
+      );
+      triggerPortfolioUpdate();
+      setShowModal(false);
+      await fetchSaldo();
+      navigate("/portfolio");
     } catch (error) {
       console.error("Errore durante la comunicazione per la transazione:", error);
-      setMessaggio("⚠️ Errore di comunicazione con il server.");
+      if (error.message === "Token JWT non trovato.") {
+        handleAuthError(401);
+      } else if (error.message.startsWith("Errore HTTP")) {
+        setMessaggio(`🚫 Errore nella transazione: ${error.message.split(" - ")[1]}`);
+      } else {
+        setMessaggio(`⚠️ Errore di comunicazione con il server: ${error.message}`);
+      }
       setShowModal(false);
     }
   };

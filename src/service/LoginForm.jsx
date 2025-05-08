@@ -2,7 +2,7 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { Form, Button, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { login } from "./authService";
+import { login } from "./apiService";
 
 const LoginForm = ({ setAutenticato, setUtenteLoggato }) => {
   const [formData, setFormData] = useState({ email: "", password: "" });

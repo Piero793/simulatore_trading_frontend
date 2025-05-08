@@ -1,10 +1,11 @@
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
+// import FinancialNews from "./FinancialNews";
 import { useState, useEffect, useCallback } from "react";
 import { FaBell, FaSync } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import { fetchAzioni, fetchAlert } from "../service/authService";
+import { fetchAzioni, fetchAlert } from "../service/apiService";
 
 const Dashboard = ({ utenteLoggato }) => {
   const [loading, setLoading] = useState(true);

@@ -1,30 +1,24 @@
 import { useState, useEffect } from "react";
 import { Carousel, Image } from "react-bootstrap";
+import { fetchFinancialNews } from "../service/apiService";
 
 const FinancialNews = () => {
   const [news, setNews] = useState([]);
-  const apiKey = "3fda8ceb53d34e8db235a812a98be558"; // API key di NewsAPI
-  const apiUrl = "https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=";
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const getFinancialNews = async () => {
       try {
-        const response = await fetch(apiUrl + apiKey);
-        if (!response.ok) {
-          throw new Error(`Errore API News: ${response.status} - ${response.statusText}`);
-        }
-        const data = await response.json();
-        console.log("DEBUG - Dati NewsAPI ricevuti:", data);
-        if (data.articles && data.articles.length > 0) {
-          setNews(data.articles.slice(0, 5)); // Mostra le prime 5 notizie
+        const articles = await fetchFinancialNews();
+        if (articles && articles.length > 0) {
+          setNews(articles.slice(0, 5)); // Mostra le prime 5 notizie
         }
       } catch (error) {
         console.error("Errore nel recupero delle notizie:", error);
       }
     };
 
-    fetchNews();
-  }, [apiKey, apiUrl]);
+    getFinancialNews();
+  }, []);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -34,11 +28,8 @@ const FinancialNews = () => {
 
   return (
     <div style={{ overflow: "hidden" }}>
-      {" "}
-      {/* Contenitore con overflow hidden */}
       {news.length > 0 ? (
         <div style={{ height: "27vh" }}>
-          {" "}
           <Carousel interval={6000} pause={false}>
             {news.map((article, index) => (
               <Carousel.Item key={index}>

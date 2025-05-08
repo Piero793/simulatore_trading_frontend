@@ -3,6 +3,10 @@ import { Table, Container, Spinner, Alert, Card } from "react-bootstrap";
 import PropTypes from "prop-types";
 import DettaglioAzione from "../components/DettaglioAzione";
 import { useNavigate } from "react-router-dom";
+import {
+  fetchPortfolio as fetchPortfolioApi,
+  fetchTransazioniPortfolio as fetchTransazioniPortfolioApi,
+} from "../service/apiService";
 
 const Portfolio = ({ aggiornaPortfolio }) => {
   const [portfolio, setPortfolio] = useState(null);
@@ -10,12 +14,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [transazioniPortfolio, setTransazioniPortfolio] = useState([]);
-
   const navigate = useNavigate();
-
-  const getJwtToken = () => {
-    return sessionStorage.getItem("jwtToken");
-  };
 
   const handleAuthError = useCallback(
     (status) => {
@@ -31,79 +30,25 @@ const Portfolio = ({ aggiornaPortfolio }) => {
     setLoading(true);
     setError(null);
 
-    const token = getJwtToken();
-    if (!token) {
-      handleAuthError(401);
-      setLoading(false);
-      return;
-    }
-
-    fetch("http://localhost:8080/api/portfolio/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError(response.status);
-          return null;
+    const loadPortfolioData = async () => {
+      try {
+        const portfolioData = await fetchPortfolioApi();
+        setPortfolio(portfolioData);
+        const transazioniData = await fetchTransazioniPortfolioApi();
+        setTransazioniPortfolio(transazioniData);
+      } catch (err) {
+        console.error("Errore nel recupero dei dati del portfolio:", err);
+        if (err.message === "Token JWT non trovato.") {
+          handleAuthError(401);
+        } else {
+          setError(`❌ Errore nel recupero del portfolio: ${err.message}`);
         }
-        if (!response.ok) {
-          if (response.status === 404) {
-            console.error(
-              "Errore 404: Endpoint /api/portfolio/me non trovato nel backend O Portfolio non trovato per l'utente."
-            );
-            throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Portfolio non esistente`);
-          }
-          throw new Error(`Errore HTTP: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data !== null) {
-          setPortfolio(data);
-        }
-      })
-      .catch((error) => {
-        console.error("Errore nel recupero del portfolio:", error);
-        setError(`❌ Errore nel recupero del portfolio: ${error.message || error}`);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
 
-    fetch("http://localhost:8080/api/transazioni/me", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then((response) => {
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError(response.status);
-          return null;
-        }
-        if (!response.ok) {
-          if (response.status === 404) {
-            console.error(
-              "Errore 404: Endpoint /api/transazioni/me non trovato nel backend O Transazioni non trovate per l'utente."
-            );
-            throw new Error(`Errore HTTP: ${response.status} - Endpoint non trovato o Transazioni non esistenti`);
-          }
-          throw new Error(`Errore HTTP: ${response.status}`);
-        }
-        return response.json();
-      })
-      .then((data) => {
-        if (data !== null) {
-          setTransazioniPortfolio(data);
-          setLoading(false);
-        }
-      })
-      .catch((error) => {
-        console.error("Errore nel recupero delle transazioni per il portfolio:", error);
-        setError(`❌ Errore nel recupero delle transazioni: ${error.message || error}`);
-        setLoading(false);
-      });
+    loadPortfolioData();
   }, [aggiornaPortfolio, handleAuthError]);
 
   const haAzioni = portfolio?.azioni?.some((azione) => azione.quantita > 0);
@@ -164,7 +109,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
             />
           )}
 
-          {/* Inserimento della Cronologia Transazioni */}
+          {/* Cronologia Transazioni */}
           <h2 className="text-center mt-5">Cronologia Transazioni</h2>
           {transazioniPortfolio.length > 0 ? (
             <Card className="mt-3">

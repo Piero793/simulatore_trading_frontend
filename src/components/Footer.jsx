@@ -13,13 +13,25 @@ const Footer = ({ autenticato }) => (
 
         {autenticato && (
           <Col md={4} className="text-center">
-            <Link to="/dashboard" className="text-secondary mx-2 fw-bold hover:text-light">
+            <Link
+              to="/dashboard"
+              className="text-secondary mx-2 fw-bold hover:text-light"
+              style={{ textDecoration: "none" }}
+            >
               Dashboard
             </Link>
-            <Link to="/portfolio" className="text-secondary mx-2 fw-bold hover:text-light">
+            <Link
+              to="/portfolio"
+              className="text-secondary mx-2 fw-bold hover:text-light"
+              style={{ textDecoration: "none" }}
+            >
               Portfolio
             </Link>
-            <Link to="/simulazione" className="text-secondary mx-2 fw-bold hover:text-light">
+            <Link
+              to="/simulazione"
+              className="text-secondary mx-2 fw-bold hover:text-light"
+              style={{ textDecoration: "none" }}
+            >
               Simulazione
             </Link>
           </Col>
