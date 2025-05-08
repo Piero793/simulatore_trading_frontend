@@ -17,7 +17,7 @@ const RegistrationForm = ({ setAutenticato, setUtenteLoggato }) => {
 
     try {
       const userData = await register(formData);
-      setAlertInfo({ message: `Registrazione completata, ${userData.nome}! Effettuo il login...`, variant: "success" });
+      setAlertInfo({ message: `Registrazione completata, benvenuto ${userData.nome}!`, variant: "success" });
 
       // **Login automatico dopo la registrazione**
       const loginData = await login(formData.email, formData.password);

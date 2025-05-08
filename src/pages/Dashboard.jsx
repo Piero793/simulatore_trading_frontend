@@ -1,122 +1,87 @@
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
 import { useState, useEffect, useCallback } from "react";
-import { FaBell } from "react-icons/fa";
+import { FaBell, FaSync } from "react-icons/fa";
 import PropTypes from "prop-types";
-// import FinancialNews from "./FinancialNews";
 import { useNavigate } from "react-router-dom";
+import { fetchAzioni, fetchAlert } from "../service/authService";
 
 const Dashboard = ({ utenteLoggato }) => {
   const [loading, setLoading] = useState(true);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [azioni, setAzioni] = useState([]);
   const [assetSelezionato, setAssetSelezionato] = useState(null);
   const [alertMessaggio, setAlertMessaggio] = useState("");
   const [mostraAlert, setMostraAlert] = useState(false);
+  const [erroreCaricamento, setErroreCaricamento] = useState(null);
 
   const navigate = useNavigate();
 
-  const getJwtToken = () => {
-    return sessionStorage.getItem("jwtToken");
-  };
+  const handleAuthError = useCallback(() => {
+    console.error("Errore di autenticazione/autorizzazione.");
+    sessionStorage.removeItem("jwtToken");
+    navigate("/");
+    alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
+  }, [navigate]);
 
-  const handleAuthError = useCallback(
-    (status) => {
-      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
-      sessionStorage.removeItem("jwtToken");
-      navigate("/");
-      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
-    },
-    [navigate]
-  );
-
-  const fetchDati = useCallback(async () => {
-    const token = getJwtToken();
-    if (!token) {
-      handleAuthError(401);
-      return;
-    }
-
+  const loadDati = useCallback(async () => {
+    setIsUpdating(true);
+    setErroreCaricamento(null);
     try {
-      const azioniRes = await fetch("http://localhost:8080/api/azioni", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (azioniRes.status === 401 || azioniRes.status === 403) {
-        handleAuthError(azioniRes.status);
-        return;
-      }
-      if (!azioniRes.ok) throw new Error(`Errore API Azioni: ${azioniRes.status} - ${azioniRes.statusText}`);
-
-      const azioniData = await azioniRes.json();
+      const azioniData = await fetchAzioni();
       setAzioni(azioniData);
-
       if (azioniData.length > 0 && assetSelezionato === null) {
         setAssetSelezionato(azioniData[0].id);
       }
     } catch (error) {
       console.error("Errore nel recupero dei dati:", error);
+      if (
+        error.message === "Token JWT non trovato." ||
+        error.message.includes("401") ||
+        error.message.includes("403")
+      ) {
+        handleAuthError();
+      } else {
+        setErroreCaricamento("Errore nel caricamento dei dati. Riprova più tardi.");
+      }
     } finally {
+      setIsUpdating(false);
       setLoading(false);
     }
   }, [assetSelezionato, handleAuthError]);
 
-  const fetchAlert = useCallback(
+  const loadAlert = useCallback(
     async (assetId) => {
-      const token = getJwtToken();
-      if (!token) {
-        handleAuthError(401);
-        return;
-      }
-
       try {
-        const response = await fetch(`http://localhost:8080/api/previsione/alert/${assetId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 401 || response.status === 403) {
-          handleAuthError(response.status);
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`Errore HTTP: ${response.status}`);
-        }
-
-        const alertData = await response.text();
+        const alertData = await fetchAlert(assetId);
         setAlertMessaggio(alertData.includes("🚨") ? alertData : "✅ Nessuna variazione significativa.");
       } catch (error) {
         console.error("Errore nel recupero dell'alert:", error);
-        setAlertMessaggio(`❌ Errore nel recupero dell'alert: ${error.message}`);
+        if (
+          error.message === "Token JWT non trovato." ||
+          error.message.includes("401") ||
+          error.message.includes("403")
+        ) {
+          handleAuthError();
+        } else {
+          setAlertMessaggio(`❌ Errore nel recupero dell'alert: ${error.message}`);
+        }
       }
     },
     [handleAuthError]
   );
 
   useEffect(() => {
-    const token = getJwtToken();
-    if (!token) {
-      handleAuthError(401);
-      return;
-    }
-
-    fetchDati();
-    const interval = setInterval(() => {
-      fetchDati();
-    }, 12000);
+    loadDati();
+    const interval = setInterval(loadDati, 180000);
     return () => clearInterval(interval);
-  }, [fetchDati, handleAuthError]);
+  }, [loadDati]);
 
   useEffect(() => {
     if (assetSelezionato !== null) {
-      fetchAlert(assetSelezionato);
+      loadAlert(assetSelezionato);
     }
-  }, [assetSelezionato, fetchAlert]);
+  }, [assetSelezionato, loadAlert]);
 
   const handleBellClick = () => {
     setMostraAlert(!mostraAlert);
@@ -133,8 +98,19 @@ const Dashboard = ({ utenteLoggato }) => {
           <Spinner animation="border" role="status" />
           <p>Caricamento dati...</p>
         </div>
+      ) : erroreCaricamento ? (
+        <Alert variant="danger" className="mt-3">
+          {erroreCaricamento}
+        </Alert>
       ) : (
         <>
+          {/* Indicatore di aggiornamento */}
+          {isUpdating && (
+            <div className="text-center mb-2">
+              <FaSync className="fa-spin" style={{ fontSize: "1.5em", color: "#007bff" }} /> Aggiornamento...
+            </div>
+          )}
+
           {/* Selezione asset */}
           <Row>
             <Col md={12} className="mb-3 text-center">

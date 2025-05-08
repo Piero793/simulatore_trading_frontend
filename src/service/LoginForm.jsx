@@ -21,7 +21,7 @@ const LoginForm = ({ setAutenticato, setUtenteLoggato }) => {
       setUtenteLoggato({ nome: data.utente.nome, id: data.utente.id, portfolioId: data.utente.portfolioId });
 
       sessionStorage.setItem("jwtToken", data.token);
-      setAlertInfo({ message: `Benvenuto, ${data.utente.nome}!`, variant: "success" });
+      setAlertInfo({ message: `Bentornato, ${data.utente.nome}!`, variant: "success" });
 
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (error) {
