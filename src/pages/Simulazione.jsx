@@ -14,12 +14,12 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   const [tipoTransazione, setTipoTransazione] = useState("");
   const navigate = useNavigate();
 
-  const getJwtToken = () => localStorage.getItem("jwtToken");
+  const getJwtToken = () => sessionStorage.getItem("jwtToken");
 
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
-      localStorage.removeItem("jwtToken");
+      sessionStorage.removeItem("jwtToken");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
       navigate("/");
     },
@@ -152,18 +152,15 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
         navigate("/portfolio");
       } else {
         try {
-          // Tenta di parsare la risposta come JSON
           const errorJson = await response.json();
           if (errorJson && errorJson.message) {
             setMessaggio(`🚫 Errore nella transazione: ${errorJson.message}`);
           } else {
-            // Se il parsing JSON fallisce o non c'è il campo 'message', mostra l'errore testuale grezzo
             const errorText = await response.text();
             setMessaggio(`🚫 Errore nella transazione: ${errorText}`);
           }
         } catch (e) {
           console.error(e);
-          // Se c'è un errore durante il parsing JSON, mostra l'errore testuale grezzo
           const errorText = await response.text();
           setMessaggio(`🚫 Errore nella transazione (parsing fallito): ${errorText}`);
         }

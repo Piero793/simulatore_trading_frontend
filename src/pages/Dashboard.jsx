@@ -16,15 +16,13 @@ const Dashboard = ({ utenteLoggato }) => {
   const navigate = useNavigate();
 
   const getJwtToken = () => {
-    return localStorage.getItem("jwtToken");
+    return sessionStorage.getItem("jwtToken");
   };
 
-  // Funzione per gestire gli errori di autenticazione/autorizzazione
-  // Rimuove il token non valido e reindirizza al login.
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
-      localStorage.removeItem("jwtToken"); // Rimuove il token
+      sessionStorage.removeItem("jwtToken");
       navigate("/");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
     },
@@ -39,8 +37,6 @@ const Dashboard = ({ utenteLoggato }) => {
     }
 
     try {
-      console.log("DEBUG - Fetching dati...");
-
       const azioniRes = await fetch("http://localhost:8080/api/azioni", {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -55,12 +51,8 @@ const Dashboard = ({ utenteLoggato }) => {
       if (!azioniRes.ok) throw new Error(`Errore API Azioni: ${azioniRes.status} - ${azioniRes.statusText}`);
 
       const azioniData = await azioniRes.json();
-
-      console.log("DEBUG - Azioni ricevute:", azioniData);
-
       setAzioni(azioniData);
 
-      // Se non ci sono transazioni iniziali, forziamo un assetSelezionato
       if (azioniData.length > 0 && assetSelezionato === null) {
         setAssetSelezionato(azioniData[0].id);
       }
@@ -80,8 +72,6 @@ const Dashboard = ({ utenteLoggato }) => {
       }
 
       try {
-        console.log(`DEBUG - Richiesta alert per asset ID: ${assetId}`);
-
         const response = await fetch(`http://localhost:8080/api/previsione/alert/${assetId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -99,8 +89,6 @@ const Dashboard = ({ utenteLoggato }) => {
         }
 
         const alertData = await response.text();
-        console.log("DEBUG - Alert ricevuto:", alertData);
-
         setAlertMessaggio(alertData.includes("🚨") ? alertData : "✅ Nessuna variazione significativa.");
       } catch (error) {
         console.error("Errore nel recupero dell'alert:", error);
@@ -111,8 +99,6 @@ const Dashboard = ({ utenteLoggato }) => {
   );
 
   useEffect(() => {
-    // Al montaggio del componente, controlla se c'è un token.
-    // Se non c'è, reindirizza al login.
     const token = getJwtToken();
     if (!token) {
       handleAuthError(401);

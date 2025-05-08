@@ -14,13 +14,13 @@ const Portfolio = ({ aggiornaPortfolio }) => {
   const navigate = useNavigate();
 
   const getJwtToken = () => {
-    return localStorage.getItem("jwtToken");
+    return sessionStorage.getItem("jwtToken");
   };
 
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
-      localStorage.removeItem("jwtToken"); // Rimuove il token
+      sessionStorage.removeItem("jwtToken");
       navigate("/");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
     },
@@ -38,7 +38,6 @@ const Portfolio = ({ aggiornaPortfolio }) => {
       return;
     }
 
-    console.log("DEBUG - Effettuo fetch GET su /api/portfolio/me");
     fetch("http://localhost:8080/api/portfolio/me", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -63,7 +62,6 @@ const Portfolio = ({ aggiornaPortfolio }) => {
       })
       .then((data) => {
         if (data !== null) {
-          console.log("DEBUG - Portfolio ricevuto:", data);
           setPortfolio(data);
         }
       })
@@ -73,7 +71,6 @@ const Portfolio = ({ aggiornaPortfolio }) => {
         setLoading(false);
       });
 
-    console.log("DEBUG - Effettuo fetch GET su /api/transazioni/me");
     fetch("http://localhost:8080/api/transazioni/me", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -98,7 +95,6 @@ const Portfolio = ({ aggiornaPortfolio }) => {
       })
       .then((data) => {
         if (data !== null) {
-          console.log("DEBUG - Transazioni ricevute per il portfolio:", data);
           setTransazioniPortfolio(data);
           setLoading(false);
         }

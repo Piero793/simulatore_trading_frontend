@@ -20,7 +20,7 @@ import { FaDownload } from "react-icons/fa";
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, zoomPlugin);
 
 const GraficoAzioni = ({ transazioni, assetId }) => {
-  const chartRef = useRef(null); // Gestione zoom/export
+  const chartRef = useRef(null);
   const [intervallo, setIntervallo] = useState("1M");
   const [datiValidi, setDatiValidi] = useState([]);
   const [transazioniValidi, setTransazioniValidi] = useState([]);
@@ -29,23 +29,20 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
   const navigate = useNavigate();
 
   const getJwtToken = () => {
-    return localStorage.getItem("jwtToken");
+    return sessionStorage.getItem("jwtToken");
   };
 
-  // Funzione per gestire gli errori di autenticazione/autorizzazione
-  // Rimuove il token non valido e reindirizza al login.
   const handleAuthError = useCallback(
     (status) => {
       console.error(`Errore di autenticazione/autorizzazione: ${status}`);
-      localStorage.removeItem("jwtToken"); // Rimuove il token
-      navigate("/"); // Reindirizza alla pagina di login
+      sessionStorage.removeItem("jwtToken");
+      navigate("/");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
     },
     [navigate]
   );
 
   useEffect(() => {
-    console.log("DEBUG - assetId in GraficoAzioni:", assetId);
     setDatiValidi([]);
     setTransazioniValidi(Array.isArray(transazioni) ? [...transazioni] : []);
 
@@ -56,8 +53,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
         return;
       }
 
-      console.log(`DEBUG - Chiamata API a /api/previsione/${assetId}`);
-
       fetch(`http://localhost:8080/api/previsione/${assetId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -65,7 +60,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
         },
       })
         .then((response) => {
-          console.log("DEBUG - Risposta API /api/previsione:", response);
           if (response.status === 401 || response.status === 403) {
             handleAuthError(response.status);
             return null;
@@ -76,7 +70,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
           return response.json();
         })
         .then((previsioneData) => {
-          console.log("DEBUG - Dati previsione ricevuti:", previsioneData);
           if (previsioneData) {
             setPrevisione(previsioneData);
             setDatiValidi(Array.isArray(previsioneData) ? [...previsioneData] : []);
@@ -102,7 +95,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
 
   const transazioniDataset = useMemo(() => {
     return transazioniValidi.map((transazione, index) => ({
-      x: index, // Potrebbe richiedere una logica più precisa per l'allineamento temporale
+      x: index,
       y: transazione.prezzoUnitario,
       backgroundColor: transazione.tipoTransazione === "Acquisto" ? "#28a745" : "#dc3545",
       borderColor: transazione.tipoTransazione === "Acquisto" ? "#28a745" : "#dc3545",
@@ -114,9 +107,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
     if (!previsione || datiFiltrati.length === 0) return [];
 
     const nextPrevisione =
-      Array.isArray(previsione) && previsione.length > 0
-        ? previsione[previsione.length - 1]?.prezzoPrevisto // Assumendo che l'ultimo elemento sia la previsione futura
-        : null;
+      Array.isArray(previsione) && previsione.length > 0 ? previsione[previsione.length - 1]?.prezzoPrevisto : null;
 
     if (nextPrevisione === null) {
       return [];
@@ -126,8 +117,8 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       {
         label: " Previsione Prezzo (€)",
         data: [
-          { x: datiFiltrati.length - 1, y: datiFiltrati[datiFiltrati.length - 1]?.prezzoPrevisto }, // Ultimo punto dati
-          { x: datiFiltrati.length, y: nextPrevisione }, // Punto previsione (un indice avanti)
+          { x: datiFiltrati.length - 1, y: datiFiltrati[datiFiltrati.length - 1]?.prezzoPrevisto },
+          { x: datiFiltrati.length, y: nextPrevisione },
         ],
         borderColor: "#ff9800",
         borderDash: [5, 5],
@@ -142,7 +133,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
   const trendlineDataset = useMemo(() => {
     if (datiFiltrati.length < 2) return [];
 
-    // Calcola i punti iniziale e finale per la trendline sui dati filtrati
     const startPoint = datiFiltrati[0];
     const endPoint = datiFiltrati[datiFiltrati.length - 1];
 
@@ -150,8 +140,8 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       {
         label: "📉 Trend Line (€)",
         data: [
-          { x: 0, y: startPoint?.prezzoPrevisto }, // Primo punto dei dati filtrati
-          { x: datiFiltrati.length - 1, y: endPoint?.prezzoPrevisto }, // Ultimo punto dei dati filtrati
+          { x: 0, y: startPoint?.prezzoPrevisto },
+          { x: datiFiltrati.length - 1, y: endPoint?.prezzoPrevisto },
         ],
         borderColor: "#17a2b8",
         borderDash: [3, 3],
@@ -177,7 +167,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
           fill: false,
           showLine: true,
         },
-        // Aggiungo i dataset di previsione e trendline
         ...previsioneDataset,
         ...trendlineDataset,
         {
@@ -212,7 +201,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
         intersect: false,
         callbacks: {
           label: (tooltipItem) => {
-            // Personalizzo la label del tooltip per mostrare il valore corretto
             if (tooltipItem.dataset.label === " Transazioni (Acquisto/Vendita)") {
               return `${tooltipItem.dataset.label}: €${tooltipItem.raw.y.toFixed(2)}`;
             }
@@ -262,7 +250,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
   return (
     <div className="grafico-container">
       <div className="text-center mb-3">
-        {/* Bottoni per selezionare l'intervallo di tempo */}
         {["1G", "1S", "1M", "1A", "ALL"].map((tempo) => (
           <button
             key={tempo}
@@ -275,7 +262,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       </div>
 
       <div className=" mb-3">
-        {/* Bottoni per gestire zoom ed export */}
         <button className="btn btn-outline-secondary me-3" onClick={resetZoom}>
           Reset Zoom
         </button>
@@ -284,7 +270,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
         </button>
       </div>
 
-      {/* Renderizza il grafico solo se ci sono dati validi */}
       {datiValidi.length > 0 ? (
         <Line ref={chartRef} data={chartData} options={chartOptions} />
       ) : (
