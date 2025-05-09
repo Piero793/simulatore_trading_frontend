@@ -2,7 +2,7 @@
 // per interagire con l'API del backend. Definisce l'URL base dell'API e una funzione
 // per gestire le risposte HTTP, inclusa la gestione degli errori e il parsing delle risposte JSON.
 
-export const API_URL = "http://localhost:8080/api";
+export const API_URL = process.env.REACT_APP_API_BASE_URL;
 
 export const handleResponse = async (response) => {
   if (!response.ok) {

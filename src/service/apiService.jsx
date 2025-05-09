@@ -10,8 +10,8 @@
 import { API_URL, handleResponse } from "./config";
 
 // news api
-const NEWS_API_BASE_URL = "https://newsapi.org/v2";
-const NEWS_API_KEY = "3fda8ceb53d34e8db235a812a98be558";
+const NEWS_API_BASE_URL = process.env.REACT_APP_NEWS_API_BASE_URL;
+const NEWS_API_KEY = process.env.REACT_APP_NEWS_API_KEY;
 
 const getJwtToken = () => sessionStorage.getItem("jwtToken");
 
@@ -30,7 +30,7 @@ const authedFetch = async (url, options = {}) => {
   return handleResponse(response);
 };
 
-// Login e registrazione (non richiedono autenticazione)
+// Login e registrazione
 export const login = async (email, password) => {
   try {
     const response = await fetch(`${API_URL}/auth/login`, {
@@ -77,7 +77,7 @@ export const fetchAlert = async (assetId) => authedFetch(`${API_URL}/previsione/
 // Previsione
 export const fetchPrevisione = async (assetId) => authedFetch(`${API_URL}/previsione/${assetId}`);
 
-// Financial News (API esterna, non autenticata con il nostro JWT)
+// Financial News
 export const fetchFinancialNews = async () => {
   const endpoint = `${NEWS_API_BASE_URL}/top-headlines?country=us&category=business&apiKey=${NEWS_API_KEY}`;
   const response = await fetch(endpoint);
