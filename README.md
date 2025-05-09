@@ -24,9 +24,9 @@ Assicurati di avere installato Node.js e npm sul tuo sistema. Puoi scaricarli da
 3.  Configurazione delle Variabili d'Ambiente
     Per far funzionare correttamente l'applicazione frontend, è necessario creare un file .env nella directory principale del progetto (simulatore_trading_frontend) e definire le seguenti variabili d'ambiente:
 
-    VITE_API_BASE_URL=http://localhost:8080/api
-    VITE_NEWS_API_BASE_URL=[https://newsapi.org/v2](https://newsapi.org/v2)
-    VITE_NEWS_API_KEY=<la_tua_API_key_di_NewsAPI>
+        VITE_API_BASE_URL=http://localhost:8080/api
+        VITE_NEWS_API_BASE_URL=https://newsapi.org/v2
+        VITE_NEWS_API_KEY=<la_tua_API_key_di_NewsAPI>
 
 ## Importante
 
