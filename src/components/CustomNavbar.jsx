@@ -3,9 +3,9 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 const CustomNavbar = ({ autenticato, handleLogout, utente }) => (
-  <Navbar bg="black" variant="dark" expand="lg" className="custom-navbar shadow-lg py-3">
+  <Navbar bg="black" variant="dark" expand="lg" className="custom-navbar">
     <Container>
-      <Navbar.Brand as={Link} to="/" className="fw-bold text-light">
+      <Navbar.Brand as={Link} to="/" className="navbar-brand">
         SimuTrade X
       </Navbar.Brand>
       <Navbar.Toggle aria-controls="navbar-nav" />
@@ -13,27 +13,27 @@ const CustomNavbar = ({ autenticato, handleLogout, utente }) => (
         <Nav className="ms-auto">
           {autenticato && (
             <>
-              <Nav.Link as={Link} to="/dashboard" className="text-light">
+              <Nav.Link as={Link} to="/dashboard" className="nav-link">
                 Dashboard
               </Nav.Link>
-              <Nav.Link as={Link} to="/portfolio" className="text-light">
+              <Nav.Link as={Link} to="/portfolio" className="nav-link">
                 Portfolio
               </Nav.Link>
-              <Nav.Link as={Link} to="/simulazione" className="text-light">
+              <Nav.Link as={Link} to="/simulazione" className="nav-link">
                 Simulazione
               </Nav.Link>
-              <Nav.Link as={Link} to="/profilo" className="text-light fw-bold">
+              {/* <Nav.Link as={Link} to="/profilo" className="nav-link active">
                 Profilo
-              </Nav.Link>
+              </Nav.Link> */}
             </>
           )}
           <Nav>
             {autenticato ? (
-              <Nav.Link className="text-danger fw-bold" onClick={handleLogout}>
+              <Nav.Link className="nav-link text-danger fw-bold" onClick={handleLogout}>
                 Logout {utente && `(${utente})`}
               </Nav.Link>
             ) : (
-              <Nav.Link as={Link} to="/" className="text-light">
+              <Nav.Link as={Link} to="/" className="nav-link">
                 {/* Login/Registrazione */}
               </Nav.Link>
             )}

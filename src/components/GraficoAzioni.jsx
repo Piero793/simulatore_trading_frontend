@@ -1,6 +1,7 @@
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Line } from "react-chartjs-2";
 import PropTypes from "prop-types";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Button } from "react-bootstrap";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { useNavigate } from "react-router-dom";
 import { fetchPrevisione } from "../service/apiService";
@@ -16,7 +17,7 @@ import {
   Legend,
   Filler,
 } from "chart.js";
-import { FaDownload } from "react-icons/fa";
+import { FaDownload, FaChartLine, FaUndo } from "react-icons/fa";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, zoomPlugin);
 
@@ -26,7 +27,6 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
   const [datiValidi, setDatiValidi] = useState([]);
   const [transazioniValidi, setTransazioniValidi] = useState([]);
   const [previsione, setPrevisione] = useState(null);
-
   const navigate = useNavigate();
 
   const handleAuthError = useCallback(
@@ -75,6 +75,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       "1S": 7,
       "1M": 30,
       "1A": 365,
+      ALL: datiValidi.length,
     };
 
     const numDati = mappingIntervalli[intervallo] || datiValidi.length;
@@ -148,11 +149,11 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
         {
           label: "📈 Prezzo Azione (€)",
           data: datiFiltrati.map((item) => item.prezzoPrevisto),
-          borderColor: "#007bff",
-          backgroundColor: "rgba(0, 123, 255, 0.2)",
-          tension: 0.5,
-          pointRadius: 5,
-          fill: false,
+          borderColor: "#6ee7b7",
+          backgroundColor: "rgba(110, 231, 183, 0.2)",
+          tension: 0.4,
+          pointRadius: 4,
+          fill: true,
           showLine: true,
         },
         ...previsioneDataset,
@@ -207,15 +208,61 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       },
       legend: {
         display: true,
+        position: "bottom",
+        labels: {
+          font: {
+            size: 12,
+          },
+          boxWidth: 12,
+        },
       },
     },
     maintainAspectRatio: false,
     responsive: true,
     scales: {
       x: {
-        title: { display: true, text: "🗓️ Giorno" },
+        title: {
+          display: true,
+          font: {
+            size: 14,
+            weight: "bold",
+          },
+        },
+        grid: {
+          display: false,
+        },
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
       },
-      y: { title: { display: true, text: "💰 Prezzo (€)" }, beginAtZero: false },
+      y: {
+        title: {
+          display: true,
+          text: "💰 Prezzo (€)",
+          font: {
+            size: 14,
+            weight: "bold",
+          },
+        },
+        beginAtZero: false,
+        grid: {
+          color: "#4a5568",
+          borderDash: [2, 2],
+        },
+        ticks: {
+          font: {
+            size: 12,
+          },
+        },
+      },
+    },
+    // Interactivity
+    interaction: {
+      mode: "nearest",
+      intersect: false,
+      axis: "x",
     },
   };
 
@@ -237,31 +284,33 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
 
   return (
     <div className="grafico-container">
-      <div className="text-center mb-3">
+      <div className="d-flex justify-content-center mb-3">
         {["1G", "1S", "1M", "1A", "ALL"].map((tempo) => (
-          <button
+          <Button
             key={tempo}
-            className={`btn mx-1 ${intervallo === tempo ? "btn-primary" : "btn-outline-primary"}`}
+            variant={intervallo === tempo ? "primary" : "outline-primary"}
+            className="mx-2 btn-sm"
             onClick={() => setIntervallo(tempo)}
           >
+            <FaChartLine className="me-1" />
             {tempo}
-          </button>
+          </Button>
         ))}
       </div>
 
-      <div className=" mb-3">
-        <button className="btn btn-outline-secondary me-3" onClick={resetZoom}>
-          Reset Zoom
-        </button>
-        <button className="btn btn-outline-success" onClick={exportChart}>
-          <FaDownload /> Esporta Grafico
-        </button>
+      <div className="d-flex justify-content-center mb-3">
+        <Button variant="outline-secondary" className="me-3 btn-sm" onClick={resetZoom}>
+          <FaUndo className="me-1" /> Reset Zoom
+        </Button>
+        <Button variant="outline-success" className="btn-sm" onClick={exportChart}>
+          <FaDownload className="me-1" /> Esporta
+        </Button>
       </div>
 
       {datiValidi.length > 0 ? (
         <Line ref={chartRef} data={chartData} options={chartOptions} />
       ) : (
-        <p className="text-center">⚠️ Nessun dato disponibile per il grafico.</p>
+        <p className="text-center text-muted">⚠️ Nessun dato disponibile per il grafico.</p>
       )}
     </div>
   );

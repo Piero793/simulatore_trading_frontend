@@ -1,7 +1,7 @@
+import { useState, useEffect, useCallback } from "react";
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
 // import FinancialNews from "./FinancialNews";
-import { useState, useEffect, useCallback } from "react";
 import { FaBell, FaSync } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
@@ -105,14 +105,12 @@ const Dashboard = ({ utenteLoggato }) => {
         </Alert>
       ) : (
         <>
-          {/* Indicatore di aggiornamento */}
           {isUpdating && (
             <div className="text-center mb-2">
-              <FaSync className="fa-spin" style={{ fontSize: "1.5em", color: "#007bff" }} /> Aggiornamento...
+              <FaSync className="fa-spin" style={{ fontSize: "1.5em", color: "#6ee7b7" }} /> Aggiornamento...
             </div>
           )}
 
-          {/* Selezione asset */}
           <Row>
             <Col md={12} className="mb-3 text-center">
               <Form.Select value={assetSelezionato || ""} onChange={(e) => setAssetSelezionato(Number(e.target.value))}>
@@ -125,7 +123,6 @@ const Dashboard = ({ utenteLoggato }) => {
             </Col>
           </Row>
 
-          {/* Grafico e Statistiche */}
           <Row>
             <Col md={8} className="mb-4">
               <Card className="dashboard-card">
@@ -149,17 +146,18 @@ const Dashboard = ({ utenteLoggato }) => {
                   <Card.Title>
                     Statistiche
                     <FaBell
-                      style={{ cursor: "pointer", marginLeft: "10px", color: "#ff9800" }}
+                      style={{ cursor: "pointer", marginLeft: "10px", color: "#ffdb58" }}
                       onClick={handleBellClick}
                     />
                   </Card.Title>
 
-                  {/* Mostra statistiche dell'asset selezionato */}
                   {azioni.length > 0 && assetSelezionato !== null ? (
                     <>
                       <p>
-                        <strong>Ultimo Prezzo:</strong> €
-                        {azioni.find((az) => az.id === assetSelezionato)?.valoreAttuale.toFixed(2) || "N/A"}
+                        <strong>Ultimo Prezzo:</strong>{" "}
+                        <span className="text-white">
+                          €{azioni.find((az) => az.id === assetSelezionato)?.valoreAttuale.toFixed(2) || "N/A"}
+                        </span>
                       </p>
                       <p>
                         <strong>Variazione Giornaliera:</strong>
@@ -174,7 +172,6 @@ const Dashboard = ({ utenteLoggato }) => {
                         </span>
                       </p>
 
-                      {/* Mostra l'alert se visibile */}
                       {mostraAlert && (
                         <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="mt-3">
                           {alertMessaggio}
@@ -189,8 +186,7 @@ const Dashboard = ({ utenteLoggato }) => {
             </Col>
           </Row>
 
-          {/* Sezione Notizie Finanziarie */}
-          <Row className="mt-4">
+          <Row className="mt-5">
             <Col md={12}>
               <Card className="dashboard-card">
                 <Card.Body>

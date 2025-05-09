@@ -22,21 +22,36 @@ const FinancialNews = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const options = { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" };
+    const options = {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    };
     return date.toLocaleDateString("it-IT", options);
   };
 
   return (
-    <div style={{ overflow: "hidden" }}>
+    <div
+      style={{
+        overflow: "hidden",
+        backgroundColor: "#2d3748",
+        padding: "20px",
+        borderRadius: "5px",
+      }}
+    >
       {news.length > 0 ? (
         <div style={{ height: "27vh" }}>
-          <Carousel interval={6000} pause={false}>
+          <Carousel
+            interval={6000}
+            pause={false}
+            controls={false} // Rimuove le frecce
+            indicators={false} // Rimuove gli indicatori
+          >
             {news.map((article, index) => (
               <Carousel.Item key={index}>
-                <div
-                  className="d-flex align-items-center"
-                  style={{ backgroundColor: "#f8f9fa", padding: "20px", borderRadius: "5px" }}
-                >
+                <div className="d-flex align-items-center">
                   {article.urlToImage && (
                     <div
                       style={{
@@ -62,10 +77,10 @@ const FinancialNews = () => {
                       rel="noopener noreferrer"
                       style={{ textDecoration: "none", color: "inherit" }}
                     >
-                      <h3>{article.title}</h3>
+                      <h3 style={{ color: "#fff" }}>{article.title}</h3>
                     </a>
-                    <p>{article.description}</p>
-                    <p className="text-muted">
+                    <p style={{ color: "#e2e8f0" }}>{article.description}</p>
+                    <p className="text-light">
                       Fonte: {article.source.name} - Pubblicato il: {formatDate(article.publishedAt)}
                     </p>
                   </div>

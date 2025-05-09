@@ -4,7 +4,7 @@ import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 const Footer = ({ autenticato }) => (
-  <footer className="footer bg-dark text-white py-4 shadow border-top border-secondary">
+  <footer className="footer">
     <Container>
       <Row className="align-items-center">
         <Col md={4} className="text-center text-md-start">
@@ -13,25 +13,13 @@ const Footer = ({ autenticato }) => (
 
         {autenticato && (
           <Col md={4} className="text-center">
-            <Link
-              to="/dashboard"
-              className="text-secondary mx-2 fw-bold hover:text-light"
-              style={{ textDecoration: "none" }}
-            >
+            <Link to="/dashboard" className="text-secondary mx-2 fw-bold hover:text-light">
               Dashboard
             </Link>
-            <Link
-              to="/portfolio"
-              className="text-secondary mx-2 fw-bold hover:text-light"
-              style={{ textDecoration: "none" }}
-            >
+            <Link to="/portfolio" className="text-secondary mx-2 fw-bold hover:text-light">
               Portfolio
             </Link>
-            <Link
-              to="/simulazione"
-              className="text-secondary mx-2 fw-bold hover:text-light"
-              style={{ textDecoration: "none" }}
-            >
+            <Link to="/simulazione" className="text-secondary mx-2 fw-bold hover:text-light">
               Simulazione
             </Link>
           </Col>

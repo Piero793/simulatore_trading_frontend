@@ -65,7 +65,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
         <Alert variant="danger">{error}</Alert>
       ) : haAzioni ? (
         <>
-          <Table striped bordered hover responsive className="text-center">
+          <Table striped bordered hover responsive className="text-center portfolio-table">
             <thead className="table-dark">
               <tr>
                 <th> Nome Azione</th>
@@ -78,7 +78,12 @@ const Portfolio = ({ aggiornaPortfolio }) => {
               {portfolio.azioni
                 .filter((azione) => azione.quantita > 0)
                 .map((azione, index) => (
-                  <tr key={index} onClick={() => setAzioneSelezionata(azione)} style={{ cursor: "pointer" }}>
+                  <tr
+                    key={index}
+                    onClick={() => setAzioneSelezionata(azione)}
+                    style={{ cursor: "pointer" }}
+                    className="portfolio-row"
+                  >
                     <td>{azione.nome || "N/D"}</td>
                     <td>{azione.quantita ?? "N/D"}</td>
                     <td>
@@ -94,7 +99,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
             </tbody>
           </Table>
 
-          <Alert variant="success" className="mt-3 text-center">
+          <Alert variant="success" className="mt-3 text-center portfolio-total">
             Totale Investito: €
             {portfolio.azioni
               .reduce((acc, azione) => acc + (azione.valoreAttuale ?? 0) * (azione.quantita ?? 1), 0)
@@ -110,29 +115,29 @@ const Portfolio = ({ aggiornaPortfolio }) => {
           )}
 
           {/* Cronologia Transazioni */}
-          <h2 className="text-center mt-5">Cronologia Transazioni</h2>
+          <h2 className="text-center mt-5 text-white">Cronologia Transazioni</h2>
           {transazioniPortfolio.length > 0 ? (
-            <Card className="mt-3">
+            <Card className="mt-3 transaction-history-card">
               <Card.Body>
-                <ul>
+                <ul className="transaction-list">
                   {transazioniPortfolio.map((transazione) => (
-                    <li key={transazione.id}>
-                      <strong>{transazione.tipoTransazione}:</strong> {transazione.quantita}x{" "}
-                      <strong>{transazione.nomeAzione}</strong> per un totale di €
-                      {(transazione.quantita * transazione.prezzoUnitario).toFixed(2)}
+                    <li key={transazione.id} className="transaction-item text-white">
+                      <strong>{transazione.tipoTransazione}:</strong> <span>{transazione.quantita}x</span>{" "}
+                      <strong>{transazione.nomeAzione}</strong> per un totale di €{" "}
+                      <span>{(transazione.quantita * transazione.prezzoUnitario).toFixed(2)}</span>
                     </li>
                   ))}
                 </ul>
               </Card.Body>
             </Card>
           ) : (
-            <Alert variant="info" className="mt-3 text-center">
+            <Alert variant="info" className="mt-3 text-center no-transactions-alert">
               Nessuna transazione registrata nel portfolio.
             </Alert>
           )}
         </>
       ) : (
-        <Alert variant="warning"> Il portfolio è vuoto, acquista la tua prima azione!</Alert>
+        <Alert variant="warning">Il portfolio è vuoto, acquista la tua prima azione!</Alert>
       )}
     </Container>
   );

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Home from "./components/Home";
 import CustomNavbar from "./components/CustomNavbar";
 import Dashboard from "./pages/Dashboard";
-import Portfolio from "./pages/Portfolio";
+import Portfolio from "./pages/portfolio";
 import Simulazione from "./pages/Simulazione";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./styles/App.css";
