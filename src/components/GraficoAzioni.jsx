@@ -16,10 +16,22 @@ import {
   Tooltip,
   Legend,
   Filler,
+  ScatterController,
 } from "chart.js";
 import { FaDownload, FaChartLine, FaUndo } from "react-icons/fa";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler, zoomPlugin);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+  Filler,
+  zoomPlugin,
+  ScatterController
+);
 
 const GraficoAzioni = ({ transazioni, assetId }) => {
   const chartRef = useRef(null);
