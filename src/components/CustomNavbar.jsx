@@ -43,7 +43,7 @@ const CustomNavbar = ({ autenticato, handleLogout, utente }) => (
     </Container>
   </Navbar>
 );
-
+// propTypes
 CustomNavbar.propTypes = {
   autenticato: PropTypes.bool.isRequired,
   handleLogout: PropTypes.func.isRequired,
