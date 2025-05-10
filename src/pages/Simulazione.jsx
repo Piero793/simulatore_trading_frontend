@@ -21,7 +21,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
   const handleAuthError = useCallback(
     (status) => {
-      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
+      console.error(`Errore di autenticazione o autorizzazione: ${status}`);
       sessionStorage.removeItem("jwtToken");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
       navigate("/");
@@ -38,7 +38,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       if (error.message === "Token JWT non trovato.") {
         handleAuthError(401);
       } else {
-        setMessaggio(`⚠️ Errore nel recupero del saldo: ${error.message}`);
+        setMessaggio(` Errore nel recupero del saldo: ${error.message}`);
       }
     }
   }, [handleAuthError]);
@@ -54,7 +54,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
         if (error.message === "Token JWT non trovato.") {
           handleAuthError(401);
         } else {
-          setMessaggio(`⚠️ Errore nel caricamento dei dati: ${error.message}`);
+          setMessaggio(` Errore nel caricamento dei dati: ${error.message}`);
         }
       }
     };
@@ -88,10 +88,10 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
   };
 
   const avviaConferma = (tipo) => {
-    if (!azioneSelezionata) return setMessaggio("⚠️ Seleziona un'azione!");
+    if (!azioneSelezionata) return setMessaggio(" Seleziona un'azione!");
     const valoreTotale = quantita * azioneSelezionata.valoreAttuale;
     if (tipo === "Acquisto" && saldo !== null && valoreTotale > saldo) {
-      return setMessaggio("🚫 Saldo insufficiente per l'acquisto!");
+      return setMessaggio(" Saldo insufficiente per l'acquisto!");
     }
     setTipoTransazione(tipo);
     setShowModal(true);
@@ -100,7 +100,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
   const handleTransazione = async () => {
     if (!azioneSelezionata || !utenteLoggato?.portfolioId) {
-      setMessaggio("🚫 Errore: dati insufficienti per completare la transazione.");
+      setMessaggio(" Errore: dati insufficienti per completare la transazione.");
       setShowModal(false);
       return;
     }
@@ -116,7 +116,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
     try {
       await creaTransazioneApi(transazione);
       setMessaggio(
-        `✅ ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${(
+        ` ${tipoTransazione} ${quantita} azioni di ${azioneSelezionata.nome} per €${(
           quantita * azioneSelezionata.valoreAttuale
         ).toFixed(2)}`
       );
@@ -129,9 +129,9 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       if (error.message === "Token JWT non trovato.") {
         handleAuthError(401);
       } else if (error.message.startsWith("Errore HTTP")) {
-        setMessaggio(`🚫 Errore nella transazione: ${error.message.split(" - ")[1]}`);
+        setMessaggio(` Errore nella transazione: ${error.message.split(" - ")[1]}`);
       } else {
-        setMessaggio(`⚠️ Errore di comunicazione con il server: ${error.message}`);
+        setMessaggio(` Errore di comunicazione con il server: ${error.message}`);
       }
       setShowModal(false);
     }

@@ -240,7 +240,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       y: {
         title: {
           display: true,
-          text: "💰 Prezzo (€)",
+          text: " Prezzo (€)",
           font: {
             size: 14,
             weight: "bold",
@@ -310,7 +310,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
       {datiValidi.length > 0 ? (
         <Line ref={chartRef} data={chartData} options={chartOptions} />
       ) : (
-        <p className="text-center text-muted">⚠️ Nessun dato disponibile per il grafico.</p>
+        <p className="text-center text-muted"> Nessun dato disponibile per il grafico.</p>
       )}
     </div>
   );

@@ -55,7 +55,7 @@ const Dashboard = ({ utenteLoggato }) => {
     async (assetId) => {
       try {
         const alertData = await fetchAlert(assetId);
-        setAlertMessaggio(alertData.includes("🚨") ? alertData : "✅ Nessuna variazione significativa.");
+        setAlertMessaggio(alertData.includes("INFO:") ? alertData : " Nessuna variazione significativa.");
       } catch (error) {
         console.error("Errore nel recupero dell'alert:", error);
         if (
@@ -65,7 +65,7 @@ const Dashboard = ({ utenteLoggato }) => {
         ) {
           handleAuthError();
         } else {
-          setAlertMessaggio(`❌ Errore nel recupero dell'alert: ${error.message}`);
+          setAlertMessaggio(` Errore nel recupero dell'alert: ${error.message}`);
         }
       }
     },
@@ -173,7 +173,7 @@ const Dashboard = ({ utenteLoggato }) => {
                       </p>
 
                       {mostraAlert && (
-                        <Alert variant={alertMessaggio.includes("🚨") ? "danger" : "success"} className="mt-3">
+                        <Alert variant={alertMessaggio.includes("INFO:") ? "danger" : "success"} className="mt-3">
                           {alertMessaggio}
                         </Alert>
                       )}

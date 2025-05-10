@@ -10,7 +10,7 @@ const FinancialNews = () => {
       try {
         const articles = await fetchFinancialNews();
         if (articles && articles.length > 0) {
-          setNews(articles.slice(0, 5)); // Mostra le prime 5 notizie
+          setNews(articles.slice(0, 6)); //  prime 6 notizie
         }
       } catch (error) {
         console.error("Errore nel recupero delle notizie:", error);
@@ -46,8 +46,8 @@ const FinancialNews = () => {
           <Carousel
             interval={6000}
             pause={false}
-            controls={false} // Rimuove le frecce
-            indicators={false} // Rimuove gli indicatori
+            controls={false} // Rimuovo le frecce
+            indicators={false} // Rimuovo gli indicatori
           >
             {news.map((article, index) => (
               <Carousel.Item key={index}>

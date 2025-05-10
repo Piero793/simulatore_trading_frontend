@@ -18,7 +18,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
 
   const handleAuthError = useCallback(
     (status) => {
-      console.error(`Errore di autenticazione/autorizzazione: ${status}`);
+      console.error(`Errore di autenticazione o autorizzazione: ${status}`);
       sessionStorage.removeItem("jwtToken");
       navigate("/");
       alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
@@ -41,7 +41,7 @@ const Portfolio = ({ aggiornaPortfolio }) => {
         if (err.message === "Token JWT non trovato.") {
           handleAuthError(401);
         } else {
-          setError(`❌ Errore nel recupero del portfolio: ${err.message}`);
+          setError(` Errore nel recupero del portfolio: ${err.message}`);
         }
       } finally {
         setLoading(false);
