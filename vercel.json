@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vitejs/plugin-react"
+      "use": "@vercel/static-build"
     }
   ],
   "routes": [
