@@ -100,7 +100,7 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
 
   const handleTransazione = async () => {
     if (!azioneSelezionata || !utenteLoggato?.portfolioId) {
-      setMessaggio(" Errore: dati insufficienti per completare la transazione.");
+      setMessaggio("Errore: dati insufficienti per completare la transazione.");
       setShowModal(false);
       return;
     }
@@ -126,14 +126,18 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
       navigate("/portfolio");
     } catch (error) {
       console.error("Errore durante la comunicazione per la transazione:", error);
+      setShowModal(false);
       if (error.message === "Token JWT non trovato.") {
         handleAuthError(401);
+      } else if (error.message.includes("Saldo insufficiente")) {
+        setMessaggio("Il tuo saldo attuale non è sufficiente per completare l'acquisto.");
+      } else if (error.message.includes("Quantità insufficiente di azioni")) {
+        setMessaggio("Non hai abbastanza azioni per eseguire la vendita.");
       } else if (error.message.startsWith("Errore HTTP")) {
-        setMessaggio(` Errore nella transazione: ${error.message.split(" - ")[1]}`);
+        setMessaggio("Si è verificato un errore durante l'elaborazione della transazione. Riprova più tardi.");
       } else {
-        setMessaggio(` Errore di comunicazione con il server: ${error.message}`);
+        setMessaggio("Si è verificato un errore inatteso. Riprova più tardi.");
       }
-      setShowModal(false);
     }
   };
 
