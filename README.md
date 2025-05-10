@@ -2,6 +2,9 @@
 
 "SimuTrade X" è un'applicazione web interattiva che consente agli utenti di simulare l'acquisto e la vendita di asset finanziari in un ambiente virtuale. L'applicazione offre una piattaforma completa per il monitoraggio dei mercati, l'analisi dei prezzi e la gestione di un portafoglio virtuale, integrando anche aggiornamenti di notizie finanziarie.
 
+Il repository principale di questa applicazione è il seguente https://github.com/Piero793/simulatore_trading.git
+Da qui puoi avviare l'intera applicazione
+
 ## Prerequisiti
 
 Assicurati di avere installato Node.js e npm sul tuo sistema. Puoi scaricarli da [https://nodejs.org/](https://nodejs.org/).
