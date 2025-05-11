@@ -80,7 +80,7 @@ const RegistrationForm = ({ setAutenticato, setUtenteLoggato }) => {
           required
         />
       </Form.Group>
-      <Button variant="success" className="w-100" type="submit">
+      <Button variant="success" className="custom-button success w-100 ms-auto" type="submit">
         Completa Registrazione
       </Button>
     </Form>

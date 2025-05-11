@@ -52,7 +52,7 @@ const LoginForm = ({ setAutenticato, setUtenteLoggato }) => {
           required
         />
       </Form.Group>
-      <Button variant="primary" className="w-100" type="submit">
+      <Button variant="primary" className="custom-button  w-100 ms-auto" type="submit">
         Login
       </Button>
     </Form>
