@@ -138,6 +138,70 @@ h3 {
   border-radius: 0.75rem;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
+/* ========================= CUSTOM BUTTON ========================= */
+.custom-button {
+  background-color: #1e293b;
+  color: #ffffff;
+  border: 1px solid #334155;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1.5rem;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 600;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin: 0 0.5rem;
+}
+
+.custom-button:hover {
+  transform: translateY(-0.125rem);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.custom-button.success {
+  background-color: #6ee7b7;
+  color: #0b0f1a;
+  border-color: #6ee7b7;
+}
+
+.custom-button.success:hover {
+  background-color: #84fab0;
+}
+
+.custom-button.danger {
+  background-color: #f44336;
+  color: #ffffff;
+  border-color: #f44336;
+}
+
+.custom-button.danger:hover {
+  background-color: #f77971;
+}
+
+.custom-button.primary {
+  background-color: #64b5f6;
+  color: #0b0f1a;
+  border-color: #64b5f6;
+}
+
+.custom-button.primary:hover {
+  background-color: #90caf9;
+}
+
+.custom-button.secondary {
+  background-color: #e0e0e0;
+  color: #333;
+  border-color: #e0e0e0;
+}
+
+.custom-button.secondary:hover {
+  background-color: #f5f5f5;
+}
+
+.custom-button:focus {
+  outline: none;
+}
+
 /* ========================= LINK STYLES ========================= */
 a {
   color: #6ee7b7;

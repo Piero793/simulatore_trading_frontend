@@ -53,6 +53,10 @@ const Portfolio = ({ aggiornaPortfolio }) => {
 
   const haAzioni = portfolio?.azioni?.some((azione) => azione.quantita > 0);
 
+  const vaiAllaSimulazione = () => {
+    navigate("/simulazione");
+  };
+
   return (
     <Container className="portfolio-container">
       <h2 className="text-center my-4"> Il tuo Portfolio</h2>
@@ -137,7 +141,12 @@ const Portfolio = ({ aggiornaPortfolio }) => {
           )}
         </>
       ) : (
-        <Alert variant="warning">Il portfolio è vuoto, acquista la tua prima azione!</Alert>
+        <Alert variant="warning" className="d-flex justify-content-between align-items-center">
+          Il portfolio è vuoto, acquista la tua prima azione!
+          <button onClick={vaiAllaSimulazione} className="custom-button">
+            Vai alla Simulazione
+          </button>
+        </Alert>
       )}
     </Container>
   );

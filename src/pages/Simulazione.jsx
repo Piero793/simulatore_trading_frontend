@@ -1,4 +1,4 @@
-import { Container, Form, Button, Alert, Row, Col, Modal } from "react-bootstrap";
+import { Container, Form, Alert, Row, Col, Modal } from "react-bootstrap";
 import { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
@@ -23,8 +23,8 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
     (status) => {
       console.error(`Errore di autenticazione o autorizzazione: ${status}`);
       sessionStorage.removeItem("jwtToken");
-      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
       navigate("/");
+      alert("La tua sessione è scaduta o non sei autorizzato. Effettua nuovamente il login.");
     },
     [navigate]
   );
@@ -180,12 +180,12 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
           </Form>
 
           <div className="text-center mt-3">
-            <Button variant="success" onClick={() => avviaConferma("Acquisto")} className="mx-2">
+            <button onClick={() => avviaConferma("Acquisto")} className="custom-button success">
               Compra
-            </Button>
-            <Button variant="danger" onClick={() => avviaConferma("Vendita")} className="mx-2">
+            </button>
+            <button onClick={() => avviaConferma("Vendita")} className="custom-button danger">
               Vendi
-            </Button>
+            </button>
           </div>
 
           {messaggio && (
@@ -209,12 +209,12 @@ const Simulazione = ({ setAggiornaPortfolio, utenteLoggato }) => {
           <p className="text-muted">La conferma scadrà tra {countdown} secondi.</p>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <button className="custom-button secondary" onClick={() => setShowModal(false)}>
             Annulla
-          </Button>
-          <Button variant="primary" onClick={handleTransazione}>
+          </button>
+          <button className="custom-button primary" onClick={handleTransazione}>
             Conferma
-          </Button>
+          </button>
         </Modal.Footer>
       </Modal>
     </Container>
