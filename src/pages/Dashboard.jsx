@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Card, Col, Container, Row, Spinner, Form, Alert } from "react-bootstrap";
 import GraficoAzioni from "../components/GraficoAzioni";
-// import FinancialNews from "./FinancialNews";
+import FinancialNews from "./FinancialNews";
 import { FaBell, FaSync } from "react-icons/fa";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
@@ -191,7 +191,7 @@ const Dashboard = ({ utenteLoggato }) => {
               <Card className="dashboard-card">
                 <Card.Body>
                   <h2 className="text-center mx-4"> Ultimi Aggiornamenti</h2>
-                  {/* <FinancialNews /> */}
+                  <FinancialNews />
                 </Card.Body>
               </Card>
             </Col>
