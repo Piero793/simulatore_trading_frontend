@@ -1,6 +1,6 @@
 // Questo file di configurazione contiene le variabili globali e le funzioni di utilità
 // per interagire con l'API del backend. Definisce l'URL base dell'API e una funzione
-// per gestire le risposte HTTP, inclusa la gestione degli errori e il parsing delle risposte JSON.
+// per gestire le risposte HTTP, inclusa la gestione degli errori e il parsing delle risposte JSON..
 
 export const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
