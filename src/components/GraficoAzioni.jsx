@@ -247,6 +247,7 @@ const GraficoAzioni = ({ transazioni, assetId }) => {
           font: {
             size: 12,
           },
+          padding: 10,
         },
       },
       y: {
